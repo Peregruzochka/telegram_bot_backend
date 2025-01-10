@@ -1,29 +1,46 @@
 package ru.peregruzochka.telegram_bot_backend.model;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "teachers")
 @Getter
 @Setter
+@Builder
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class Teacher {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(nullable = false, length = 256)
+    @Column(nullable = false, length = 256, unique = true)
     private String name;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "image_id", nullable = false)
     private Image image;
 
+    @ToString.Exclude
     @ManyToMany(mappedBy = "teachers")
-    private Set<Lesson> lessons;
+    private List<Lesson> lessons;
 }

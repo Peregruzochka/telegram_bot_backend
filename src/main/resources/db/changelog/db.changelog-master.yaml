@@ -3,3 +3,5 @@ databaseChangeLog:
       file: db/changelog/changeset/v001_init.sql
   - include:
       file: db/changelog/changeset/v002_lesson_teacher.sql
+  - include:
+      file: db/changelog/changeset/v003_unique_lessons_name.sql
