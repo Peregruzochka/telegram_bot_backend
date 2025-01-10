@@ -36,6 +36,7 @@ public class Lesson {
     @Column(nullable = false, length = 256)
     private String name;
 
+    @ToString.Exclude
     @Column(nullable = false, columnDefinition = "TEXT")
     private String description;
 
