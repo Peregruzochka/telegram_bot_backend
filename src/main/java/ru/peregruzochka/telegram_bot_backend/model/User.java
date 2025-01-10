@@ -5,16 +5,20 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Table(name = "users")
 @Getter
 @Setter
+@ToString
 public class User {
 
     @Id
@@ -29,4 +33,8 @@ public class User {
 
     @Column(name = "user_name", nullable = false, length = 256)
     private String userName;
+
+    @ToString.Exclude
+    @OneToMany(mappedBy = "parent")
+    private List<Child> children;
 }
