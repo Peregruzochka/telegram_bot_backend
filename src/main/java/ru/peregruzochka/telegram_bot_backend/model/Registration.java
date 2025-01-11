@@ -26,7 +26,7 @@ public class Registration {
 
     @ManyToOne
     @JoinColumn(name = "timeslot_id", nullable = false)
-    private Timeslot timeslot;
+    private TimeSlot timeslot;
 
     @Column(nullable = false)
     private Boolean confirmed;

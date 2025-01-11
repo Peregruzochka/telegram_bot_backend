@@ -5,3 +5,6 @@ databaseChangeLog:
       file: db/changelog/changeset/v002_lesson_teacher.sql
   - include:
       file: db/changelog/changeset/v003_unique_lessons_name.sql
+  - include:
+      file: db/changelog/changeset/v004_timeslots_is_available.sql
+

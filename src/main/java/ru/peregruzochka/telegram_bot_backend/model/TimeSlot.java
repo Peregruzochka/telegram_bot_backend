@@ -8,8 +8,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -18,7 +22,11 @@ import java.util.UUID;
 @Table(name = "timeslots")
 @Getter
 @Setter
-public class Timeslot {
+@ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class TimeSlot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -33,4 +41,7 @@ public class Timeslot {
     @ManyToOne
     @JoinColumn(name = "teacher_id", nullable = false)
     private Teacher teacher;
+
+    @Column(name = "is_available", nullable = false)
+    private Boolean isAvailable;
 }

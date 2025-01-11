@@ -1,0 +1,25 @@
+package ru.peregruzochka.telegram_bot_backend.mapper;
+
+import org.springframework.stereotype.Component;
+import ru.peregruzochka.telegram_bot_backend.dto.TimeSlotDto;
+import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
+
+import java.util.List;
+
+@Component
+public class TimeSlotMapper {
+    public TimeSlotDto toTimeSlotDto(TimeSlot timeSlot) {
+        return TimeSlotDto.builder()
+                .id(timeSlot.getId())
+                .startTime(timeSlot.getStartTime())
+                .endTime(timeSlot.getEndTime())
+                .teacherId(timeSlot.getTeacher().getId())
+                .build();
+    }
+
+    public List<TimeSlotDto> toTimeSlotDtoList(List<TimeSlot> timeSlots) {
+        return timeSlots.stream()
+                .map(this::toTimeSlotDto)
+                .toList();
+    }
+}
