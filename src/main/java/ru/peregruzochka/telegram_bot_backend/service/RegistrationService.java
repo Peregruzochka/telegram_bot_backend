@@ -9,14 +9,17 @@ import ru.peregruzochka.telegram_bot_backend.model.Lesson;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
 import ru.peregruzochka.telegram_bot_backend.model.User;
+import ru.peregruzochka.telegram_bot_backend.repository.ChildRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.LessonRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.RegistrationRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.UserRepository;
 
 import java.util.List;
+import java.util.UUID;
 
 import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.RegistrationType.NEW_USER;
+import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.RegistrationType.REGULAR_USER;
 
 
 @Slf4j
@@ -27,6 +30,7 @@ public class RegistrationService {
     private final RegistrationRepository registrationRepository;
     private final LessonRepository lessonRepository;
     private final TimeSlotRepository timeSlotRepository;
+    private final ChildRepository childRepository;
 
     @Transactional
     public Registration addRegistration(Registration registration) {
@@ -36,6 +40,36 @@ public class RegistrationService {
             newUser.setChildren(List.of(newChild));
             newChild.setParent(newUser);
             userRepository.save(newUser);
+
+        } else if (registration.getType().equals(REGULAR_USER)) {
+            Long telegramId = registration.getUser().getTelegramId();
+            User regularUser = userRepository.findByTelegramId(telegramId)
+                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+            if (!regularUser.equals(registration.getUser())) {
+                regularUser.setUserName(registration.getUser().getUserName());
+                regularUser.setPhone(registration.getUser().getPhone());
+            }
+
+
+            Child registrationChild = registration.getChild();
+
+            if (registrationChild.getId() == null) {
+                registrationChild.setParent(regularUser);
+                childRepository.save(registrationChild);
+            } else {
+                UUID childId = registrationChild.getId();
+                Child existChild = childRepository.findById(childId)
+                        .orElseThrow(() -> new IllegalArgumentException("Child not found"));
+                if (!existChild.equals(registrationChild)) {
+                    existChild.setChildName(registrationChild.getChildName());
+                    existChild.setBirthday(registrationChild.getBirthday());
+                    childRepository.save(existChild);
+                }
+            }
+
+            userRepository.save(regularUser);
+            registration.setUser(regularUser);
         }
 
         Lesson registrationLesson = registration.getLesson();
@@ -55,4 +89,5 @@ public class RegistrationService {
         log.info("Registration added: {}", savedRegistration);
         return savedRegistration;
     }
+
 }
