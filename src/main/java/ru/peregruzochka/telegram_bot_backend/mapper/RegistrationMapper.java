@@ -5,6 +5,9 @@ import org.springframework.stereotype.Component;
 import ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 @RequiredArgsConstructor
 public class RegistrationMapper {
@@ -35,6 +38,13 @@ public class RegistrationMapper {
                 .lesson(lessonMapper.toLessonDto(registration.getLesson()))
                 .teacher(teacherMapper.toTeacherDto(registration.getTimeslot().getTeacher()))
                 .slot(timeSlotMapper.toTimeSlotDto(registration.getTimeslot()))
+                .type(registration.getType())
                 .build();
+    }
+
+    public List<RegistrationDto> toRegistrationDtoList(List<Registration> registrations) {
+        return registrations.stream()
+                .map(this::toRegistrationDto)
+                .collect(Collectors.toList());
     }
 }

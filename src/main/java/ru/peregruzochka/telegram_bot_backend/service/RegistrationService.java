@@ -90,4 +90,12 @@ public class RegistrationService {
         return savedRegistration;
     }
 
+    public List<Registration> getAllUserRegistration(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        List<Registration> registrations = registrationRepository.findAllByUser(user);
+        log.info("Registrations found: {}", registrations.size());
+        return registrations;
+    }
 }
