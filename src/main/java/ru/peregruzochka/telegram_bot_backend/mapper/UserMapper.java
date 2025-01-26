@@ -24,5 +24,14 @@ public class UserMapper {
                 .build();
     }
 
+    public User toUserEntity(UserDto userDto) {
+        return User.builder()
+                .id(userDto.getId())
+                .telegramId(userDto.getTelegramId())
+                .userName(userDto.getName())
+                .phone(userDto.getPhone())
+                .build();
+    }
+
 
 }

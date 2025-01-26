@@ -25,4 +25,11 @@ public class TeacherMapper {
                 .map(this::toTeacherDto)
                 .collect(Collectors.toList());
     }
+
+    public Teacher toTeacherEntity(TeacherDto teacherDto) {
+        return Teacher.builder()
+                .id(teacherDto.getId())
+                .name(teacherDto.getName())
+                .build();
+    }
 }

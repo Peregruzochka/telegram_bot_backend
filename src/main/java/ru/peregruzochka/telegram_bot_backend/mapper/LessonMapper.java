@@ -24,6 +24,7 @@ public class LessonMapper {
 
     public Lesson toLessonEntity(LessonDto lessonDto) {
         return Lesson.builder()
+                .id(lessonDto.getId())
                 .name(lessonDto.getName())
                 .description(lessonDto.getDescription())
                 .build();

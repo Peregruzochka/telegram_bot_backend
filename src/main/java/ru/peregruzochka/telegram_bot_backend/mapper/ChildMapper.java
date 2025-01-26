@@ -17,6 +17,14 @@ public class ChildMapper {
                 .build();
     }
 
+    public Child toChildEntity(ChildDto childDto) {
+        return Child.builder()
+                .id(childDto.getId())
+                .childName(childDto.getName())
+                .birthday(childDto.getBirthday())
+                .build();
+    }
+
     public List<ChildDto> toChildDtoList(List<Child> childList) {
         return childList.stream()
                 .map(this::toChildDto)

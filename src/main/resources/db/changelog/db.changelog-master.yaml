@@ -7,4 +7,9 @@ databaseChangeLog:
       file: db/changelog/changeset/v003_unique_lessons_name.sql
   - include:
       file: db/changelog/changeset/v004_timeslots_is_available.sql
+  - include:
+      file:  db/changelog/changeset/v005_registrations_add_user.sql
+  - include:
+      file: db/changelog/changeset/v006_users_telegramId_unique.sql
+
 
