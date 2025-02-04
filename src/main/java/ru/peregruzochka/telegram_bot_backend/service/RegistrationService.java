@@ -94,7 +94,7 @@ public class RegistrationService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        List<Registration> registrations = registrationRepository.findAllByUser(user);
+        List<Registration> registrations = registrationRepository.findAllActiveByUser(user);
         log.info("Registrations found: {}", registrations.size());
         return registrations;
     }

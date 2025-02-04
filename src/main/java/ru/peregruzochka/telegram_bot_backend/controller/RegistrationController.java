@@ -30,7 +30,7 @@ public class RegistrationController {
     }
 
     @GetMapping
-    public List<RegistrationDto> getAllUserRegistrations(@RequestParam("user-id") UUID userId) {
+    public List<RegistrationDto> getAllUserActiveRegistrations(@RequestParam("user-id") UUID userId) {
         List<Registration> registrations = registrationService.getAllUserRegistration(userId);
         return registrationMapper.toRegistrationDtoList(registrations);
     }

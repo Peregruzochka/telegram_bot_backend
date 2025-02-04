@@ -32,7 +32,6 @@ public class RegistrationMapper {
         return RegistrationDto.builder()
                 .id(registration.getId())
                 .telegramId(registration.getUser().getTelegramId())
-
                 .child(childMapper.toChildDto(registration.getChild()))
                 .user(userMapper.toUserDto(registration.getUser()))
                 .lesson(lessonMapper.toLessonDto(registration.getLesson()))

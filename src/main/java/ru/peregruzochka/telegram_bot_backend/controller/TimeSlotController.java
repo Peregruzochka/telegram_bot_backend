@@ -3,6 +3,7 @@ package ru.peregruzochka.telegram_bot_backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -11,7 +12,7 @@ import ru.peregruzochka.telegram_bot_backend.mapper.TimeSlotMapper;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
 import ru.peregruzochka.telegram_bot_backend.service.TimeSlotService;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,11 +29,16 @@ public class TimeSlotController {
         return timeSlotMapper.toTimeSlotDtoList(timeSlots);
     }
 
+    @GetMapping("/by-date")
+    public List<TimeSlotDto> getTeacherTimeSlotsByDate(@RequestParam("teacher-id") UUID teacherId, @RequestParam LocalDate date) {
+        List<TimeSlot> timeSlots = timeSlotService.getTeacherTimeSlotsByDate(teacherId, date);
+        return timeSlotMapper.toTimeSlotDtoList(timeSlots);
+    }
+
     @PostMapping
-    public TimeSlotDto addTimeSlot(@RequestParam("teacher-id") UUID teacherId,
-                                   @RequestParam("start-time") LocalDateTime startTime,
-                                   @RequestParam("end-time") LocalDateTime endTime) {
-        TimeSlot timeSlot = timeSlotService.addTimeSlot(teacherId, startTime, endTime);
-        return timeSlotMapper.toTimeSlotDto(timeSlot);
+    public TimeSlotDto addTimeSlot(@RequestBody TimeSlotDto timeSlotDto) {
+        TimeSlot timeSlot = timeSlotMapper.toTimeSlotEntity(timeSlotDto);
+        TimeSlot savedTimeSlot = timeSlotService.addTimeSlot(timeSlot);
+        return timeSlotMapper.toTimeSlotDto(savedTimeSlot);
     }
 }

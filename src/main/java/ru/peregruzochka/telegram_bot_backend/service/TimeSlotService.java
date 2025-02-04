@@ -10,6 +10,7 @@ import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotRepository;
 
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -29,13 +30,33 @@ public class TimeSlotService {
 
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime plusMonth = now.plusMonths(1);
-        List<TimeSlot> timeSlots = timeSlotRepository.getTeacherTimeSlots(teacher, now, plusMonth);
-        log.info("Get time slot list ({}) for teacher {}", timeSlots.size(), teacher);
+        List<TimeSlot> timeSlots = timeSlotRepository.getTeacherAvailableTimeSlots(teacher, now, plusMonth);
+        log.info("Get available time slot list ({}) for teacher {}", timeSlots.size(), teacher);
+        return timeSlots;
+    }
+
+    @Transactional(readOnly = true)
+    public List<TimeSlot> getTeacherTimeSlotsByDate(UUID teacherId, LocalDate date) {
+        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found")
+        );
+        LocalDateTime from = date.atStartOfDay();
+        LocalDateTime to = from.plusDays(1);
+        List<TimeSlot> timeSlots = timeSlotRepository.getTeacherAllTimeSlots(teacher, from, to);
+        log.info("Get all time slot list ({}) for teacher {}", timeSlots.size(), teacher);
         return timeSlots;
     }
 
     @Transactional
-    public TimeSlot addTimeSlot(UUID teacherId, LocalDateTime startTime, LocalDateTime endTime) {
+    public TimeSlot addTimeSlot(TimeSlot newTimeSlot) {
+        LocalDateTime startTime = newTimeSlot.getStartTime();
+        LocalDateTime endTime = newTimeSlot.getEndTime();
+        UUID teacherId = newTimeSlot.getTeacher().getId();
+
+        if (endTime == null) {
+            endTime = startTime.plusMinutes(45);
+        }
+
         if (startTime.isAfter(endTime) || startTime.isEqual(endTime)) {
             throw new IllegalArgumentException("Start time must be before end time");
         }
@@ -44,8 +65,8 @@ public class TimeSlotService {
             throw new IllegalArgumentException("Time slot cannot start in the past");
         }
 
-        if (Duration.between(startTime, endTime).toHours() > 2) {
-            throw new IllegalArgumentException("Time slot duration must not exceed 2 hours");
+        if (Duration.between(startTime, endTime).toMinutes() != 45) {
+            throw new IllegalArgumentException("Time slot duration must not exceed 45 minutes");
         }
 
         Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
@@ -68,4 +89,6 @@ public class TimeSlotService {
         log.info("Saved time slot {}", savedTimeSlot);
         return savedTimeSlot;
     }
+
+
 }

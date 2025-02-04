@@ -2,6 +2,7 @@ package ru.peregruzochka.telegram_bot_backend.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -14,6 +15,8 @@ import ru.peregruzochka.telegram_bot_backend.mapper.TeacherMapper;
 import ru.peregruzochka.telegram_bot_backend.model.Image;
 import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.service.TeacherService;
+
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -30,6 +33,13 @@ public class TeacherController {
         Image image = imageMapper.toImageEntity(file);
         Teacher teacher = teacherService.addTeacher(name, image);
         return teacherMapper.toTeacherDto(teacher);
+    }
+
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<TeacherDto> getAllTeachers() {
+        List<Teacher> teachers = teacherService.getAllTeachers();
+        return teacherMapper.toTeacherDtoList(teachers);
     }
 
 }

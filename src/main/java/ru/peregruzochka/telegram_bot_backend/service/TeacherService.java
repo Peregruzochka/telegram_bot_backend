@@ -9,6 +9,8 @@ import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.repository.ImageRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 
+import java.util.List;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -26,5 +28,12 @@ public class TeacherService {
         Teacher savedTeacher = teacherRepository.save(teacher);
         log.info("Teacher added: {}", savedTeacher);
         return savedTeacher;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Teacher> getAllTeachers() {
+        List<Teacher> teachers = teacherRepository.findAll();
+        log.info("Teachers found: {}", teachers.size());
+        return teachers;
     }
 }

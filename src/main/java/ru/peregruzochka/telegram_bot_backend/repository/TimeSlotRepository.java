@@ -20,7 +20,7 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, UUID> {
         and t.startTime >= :from
         and t.endTime <= :to
         """)
-    List<TimeSlot> getTeacherTimeSlots(Teacher teacher, LocalDateTime from, LocalDateTime to);
+    List<TimeSlot> getTeacherAvailableTimeSlots(Teacher teacher, LocalDateTime from, LocalDateTime to);
 
     @Query("""
         select t from TimeSlot t
@@ -28,4 +28,12 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, UUID> {
         and (t.startTime <= :from and t.endTime > :from or t.startTime < :to and t.endTime >= :to)
         """)
     List<TimeSlot> findOverlappingTimeSlots(Teacher teacher, LocalDateTime from, LocalDateTime to);
+
+    @Query("""
+        select t from TimeSlot t
+        where t.teacher = :teacher
+        and t.startTime >= :from
+        and t.endTime <= :to
+        """)
+    List<TimeSlot> getTeacherAllTimeSlots(Teacher teacher, LocalDateTime from, LocalDateTime to);
 }
