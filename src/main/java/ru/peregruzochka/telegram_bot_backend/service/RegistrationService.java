@@ -15,6 +15,8 @@ import ru.peregruzochka.telegram_bot_backend.repository.RegistrationRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.UserRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -123,5 +125,14 @@ public class RegistrationService {
         Registration updatedRegistration = registrationRepository.save(currentRegistration);
         log.info("Registration updated: {}", updatedRegistration);
         return updatedRegistration;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Registration> getAllRegistrationByToday() {
+        LocalDateTime start = LocalDate.now().atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+        List<Registration> registrations = registrationRepository.findBetween(start, end);
+        log.info("Today registrations found: {}", registrations.size());
+        return registrations;
     }
 }

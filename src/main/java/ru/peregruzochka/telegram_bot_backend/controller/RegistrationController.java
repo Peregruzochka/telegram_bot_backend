@@ -41,4 +41,10 @@ public class RegistrationController {
         Registration updatedRegistration = registrationService.updateRegistration(registration);
         return registrationMapper.toRegistrationDto(updatedRegistration);
     }
+
+    @GetMapping("/search-today")
+    public List<RegistrationDto> getAllRegistrationsByToday() {
+        List<Registration> registrations = registrationService.getAllRegistrationByToday();
+        return registrationMapper.toRegistrationDtoList(registrations);
+    }
 }
