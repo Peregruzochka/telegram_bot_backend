@@ -1,0 +1,2 @@
+ALTER TABLE cancel
+ADD COLUMN start_time TIMESTAMP NOT NULL;

@@ -42,6 +42,9 @@ public class Cancel {
     @Column(name = "case_description", nullable = false, columnDefinition = "TEXT")
     private String caseDescription;
 
+    @Column(name = "start_time", nullable = false)
+    private LocalDateTime startTime;
+
     @Column(name = "created_at", nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
     @CreationTimestamp

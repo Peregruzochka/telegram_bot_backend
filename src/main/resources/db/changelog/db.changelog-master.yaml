@@ -11,5 +11,9 @@ databaseChangeLog:
       file:  db/changelog/changeset/v005_registrations_add_user.sql
   - include:
       file: db/changelog/changeset/v006_users_telegramId_unique.sql
+  - include:
+      file: db/changelog/changeset/v007_cancel_add_start_time.sql
+  - include:
+      file: db/changelog/changeset/v008_registration_drop_not_null.sql
 
 

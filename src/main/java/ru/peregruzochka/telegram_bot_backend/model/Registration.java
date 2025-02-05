@@ -47,7 +47,7 @@ public class Registration {
     private Lesson lesson;
 
     @ManyToOne
-    @JoinColumn(name = "timeslot_id", nullable = false)
+    @JoinColumn(name = "timeslot_id")
     private TimeSlot timeslot;
 
     @Column(nullable = false)

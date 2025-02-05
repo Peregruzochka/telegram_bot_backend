@@ -90,5 +90,9 @@ public class TimeSlotService {
         return savedTimeSlot;
     }
 
-
+    @Transactional
+    public void removeTimeSlot(UUID timeslotId) {
+        timeSlotRepository.deleteById(timeslotId);
+        log.info("Removed time slot {}", timeslotId);
+    }
 }

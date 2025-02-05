@@ -9,6 +9,7 @@ import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
 import ru.peregruzochka.telegram_bot_backend.repository.CancelRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.RegistrationRepository;
+import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotRepository;
 
 import java.util.UUID;
 
@@ -20,6 +21,7 @@ import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.Registra
 public class CancelService {
     private final RegistrationRepository registrationRepository;
     private final CancelRepository cancelRepository;
+    private final TimeSlotRepository timeSlotRepository;
 
 
     @Transactional
@@ -33,10 +35,16 @@ public class CancelService {
             throw new IllegalArgumentException("Can't cancel registration");
         }
 
-        registration.setType(CANCEL);
-        cancel.setRegistration(registration);
         TimeSlot timeSlot = registration.getTimeslot();
         timeSlot.setIsAvailable(true);
+        timeSlotRepository.save(timeSlot);
+
+        registration.setType(CANCEL);
+        registration.setTimeslot(null);
+        registrationRepository.save(registration);
+
+        cancel.setRegistration(registration);
+        cancel.setStartTime(timeSlot.getStartTime());
 
         Cancel savedCancel = cancelRepository.save(cancel);
         log.info("Saved cancel: {}", savedCancel);
