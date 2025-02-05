@@ -34,4 +34,11 @@ public class RegistrationController {
         List<Registration> registrations = registrationService.getAllUserRegistration(userId);
         return registrationMapper.toRegistrationDtoList(registrations);
     }
+
+    @PostMapping("/update")
+    public RegistrationDto updateRegistration(@RequestBody RegistrationDto registrationDto) {
+        Registration registration = registrationMapper.toRegistrationEntity(registrationDto);
+        Registration updatedRegistration = registrationService.updateRegistration(registration);
+        return registrationMapper.toRegistrationDto(updatedRegistration);
+    }
 }

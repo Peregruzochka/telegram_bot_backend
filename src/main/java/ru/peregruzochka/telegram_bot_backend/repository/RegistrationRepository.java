@@ -15,6 +15,7 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
             select r from Registration r
             where r.user = ?1
             and r.type != "CANCEL"
+            order by r.timeslot.startTime
             """)
     List<Registration> findAllActiveByUser(User user);
 }

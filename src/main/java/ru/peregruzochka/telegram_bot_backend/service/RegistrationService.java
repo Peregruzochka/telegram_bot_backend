@@ -90,6 +90,7 @@ public class RegistrationService {
         return savedRegistration;
     }
 
+    @Transactional(readOnly = true)
     public List<Registration> getAllUserRegistration(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
@@ -97,5 +98,30 @@ public class RegistrationService {
         List<Registration> registrations = registrationRepository.findAllActiveByUser(user);
         log.info("Registrations found: {}", registrations.size());
         return registrations;
+    }
+
+    @Transactional
+    public Registration updateRegistration(Registration registration) {
+        UUID currentRegistrationId = registration.getId();
+        Registration currentRegistration = registrationRepository.findById(currentRegistrationId).orElseThrow(
+                () -> new IllegalArgumentException("Registration not found")
+        );
+
+        TimeSlot currentTimeSlot = currentRegistration.getTimeslot();
+        currentTimeSlot.setIsAvailable(true);
+        timeSlotRepository.save(currentTimeSlot);
+        log.info("Time slot is available: {}", currentTimeSlot);
+
+        UUID newTimeSlotId = registration.getTimeslot().getId();
+        TimeSlot newTimeSlot = timeSlotRepository.findById(newTimeSlotId).orElseThrow(
+                () -> new IllegalArgumentException("TimeSlot not found")
+        );
+        newTimeSlot.setIsAvailable(false);
+
+        currentRegistration.setTimeslot(newTimeSlot);
+
+        Registration updatedRegistration = registrationRepository.save(currentRegistration);
+        log.info("Registration updated: {}", updatedRegistration);
+        return updatedRegistration;
     }
 }
