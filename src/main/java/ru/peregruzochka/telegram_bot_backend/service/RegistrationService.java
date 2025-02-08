@@ -9,6 +9,7 @@ import ru.peregruzochka.telegram_bot_backend.model.Lesson;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
 import ru.peregruzochka.telegram_bot_backend.model.User;
+import ru.peregruzochka.telegram_bot_backend.redis.NewRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.repository.ChildRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.LessonRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.RegistrationRepository;
@@ -33,6 +34,7 @@ public class RegistrationService {
     private final LessonRepository lessonRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final ChildRepository childRepository;
+    private final NewRegistrationEventPublisher newRegistrationEventPublisher;
 
     @Transactional
     public Registration addRegistration(Registration registration) {
@@ -89,6 +91,7 @@ public class RegistrationService {
         Registration savedRegistration = registrationRepository.save(registration);
 
         log.info("Registration added: {}", savedRegistration);
+        newRegistrationEventPublisher.publish(savedRegistration);
         return savedRegistration;
     }
 

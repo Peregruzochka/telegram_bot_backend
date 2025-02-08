@@ -8,6 +8,10 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
 
+  data:
+    redis-channel:
+      new-registration: create-registration
+
   jpa:
     hibernate:
       ddl-auto: none
@@ -21,3 +25,5 @@ logging:
 
 server:
   port: 8081
+
+
