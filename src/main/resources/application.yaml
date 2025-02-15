@@ -28,6 +28,6 @@ server:
   port: 8081
 
 scheduler:
-  get-non-confirmed: 0 */5 * * * *
+  get-non-confirmed: 0 */1 * * * *
 
 

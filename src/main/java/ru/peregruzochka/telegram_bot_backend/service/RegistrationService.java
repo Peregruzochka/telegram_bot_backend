@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.RegistrationType.NEW_USER;
 import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.RegistrationType.REGULAR_USER;
+import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.FIRST_QUESTION;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.NOT_CONFIRMED;
 
 
@@ -145,6 +146,8 @@ public class RegistrationService {
         LocalDateTime time = LocalDateTime.now().plusDays(1);
         List<Registration> registrations = registrationRepository.findNotConfirmedAfterTime(time);
         log.info("NOT_CONFIRMED registrations found: {}", registrations.size());
+        registrations.forEach(registration -> registration.setConfirmStatus(FIRST_QUESTION));
+        registrationRepository.saveAll(registrations);
         return registrations;
     }
 }
