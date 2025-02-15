@@ -17,7 +17,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public User getUserByTelegramId(Long telegramId) {
         User user = userRepository.findByTelegramId(telegramId)
-                .orElseThrow(() -> new IllegalArgumentException("User with tgId " + telegramId + " don`t exist"));
+                .orElse(null);
         log.info("Get user by tgId {}: {}", telegramId, user);
         return user;
     }
