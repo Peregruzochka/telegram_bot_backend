@@ -16,6 +16,7 @@ spring:
       local-cancel: local-cancel
       cancel: cancel
       first-question: first-question
+      second-question: second-question
 
   jpa:
     hibernate:

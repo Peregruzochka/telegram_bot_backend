@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.peregruzochka.telegram_bot_backend.dto.LocalCancelEvent;
 import ru.peregruzochka.telegram_bot_backend.model.Child;
 import ru.peregruzochka.telegram_bot_backend.model.Lesson;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
@@ -25,6 +26,7 @@ import java.util.UUID;
 
 import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.RegistrationType.NEW_USER;
 import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.RegistrationType.REGULAR_USER;
+import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.AUTO_CANCELLED;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.CONFIRMED;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.FIRST_QUESTION;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.NOT_CONFIRMED;
@@ -63,7 +65,6 @@ public class RegistrationService {
                 regularUser.setUserName(registration.getUser().getUserName());
                 regularUser.setPhone(registration.getUser().getPhone());
             }
-
 
             Child registrationChild = registration.getChild();
 
@@ -169,26 +170,56 @@ public class RegistrationService {
     }
 
     @Transactional
+    public List<Registration> getSecondQuestionRegistration() {
+        LocalDateTime time = LocalDateTime.now().plusDays(1).plusHours(3).plusHours(1);
+        List<Registration> registrations = registrationRepository.findSecondQuestionAfterTime(time);
+        log.info("SECOND_QUESTION registrations found: {}", registrations.size());
+        registrations.forEach(registration -> registration.setConfirmStatus(AUTO_CANCELLED));
+        registrationRepository.saveAll(registrations);
+
+        registrations.stream()
+                .map(Registration::getId)
+                .map(id -> LocalCancelEvent.builder()
+                        .registrationId(id)
+                        .caseDescription("Автоматическая отмена занятия")
+                        .build()
+                )
+                .forEach(localCancelPublisher::publish);
+
+        return registrations;
+    }
+
+    @Transactional
     public Registration confirm(UUID registrationId) {
         Registration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new IllegalArgumentException("Registration not found"));
-
-        registration.setConfirmStatus(CONFIRMED);
-        log.info("Confirm registration: {}", registration);
-        confirmRegistrationEventPublisher.publish(registration);
-        return registrationRepository.save(registration);
+        if (registration.getConfirmStatus() == FIRST_QUESTION || registration.getConfirmStatus() == SECOND_QUESTION) {
+            registration.setConfirmStatus(CONFIRMED);
+            log.info("Confirm registration: {}", registration);
+            confirmRegistrationEventPublisher.publish(registration);
+            return registrationRepository.save(registration);
+        } else {
+            return registration;
+        }
     }
 
     @Transactional
     public Registration decline(UUID registrationId) {
         Registration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new IllegalArgumentException("Registration not found"));
+        if (registration.getConfirmStatus() == FIRST_QUESTION || registration.getConfirmStatus() == SECOND_QUESTION) {
+            registration.setConfirmStatus(USER_CANCELLED);
+            log.info("Decline registration: {}", registration);
 
-        registration.setConfirmStatus(USER_CANCELLED);
-        log.info("Decline registration: {}", registration);
-        localCancelPublisher.publish(registrationId);
-        return registrationRepository.save(registration);
+            LocalCancelEvent localCancelEvent = LocalCancelEvent.builder()
+                    .registrationId(registrationId)
+                    .caseDescription("Клиент отказался от занятия после вопроса о подтверждении")
+                    .build();
+
+            localCancelPublisher.publish(localCancelEvent);
+            return registrationRepository.save(registration);
+        } else {
+            return registration;
+        }
     }
-
-
 }

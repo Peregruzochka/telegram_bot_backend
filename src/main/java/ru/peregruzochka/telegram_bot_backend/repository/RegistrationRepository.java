@@ -41,4 +41,11 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
            and r.confirmStatus = "FIRST_QUESTION"
            """)
     List<Registration> findFirstQuestionAfterTime(LocalDateTime time);
+
+    @Query("""
+           select r from Registration r
+           where r.timeslot.startTime < :time
+           and r.confirmStatus = "SECOND_QUESTION"
+           """)
+    List<Registration> findSecondQuestionAfterTime(LocalDateTime time);
 }

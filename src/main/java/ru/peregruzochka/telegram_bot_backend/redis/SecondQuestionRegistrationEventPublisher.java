@@ -11,24 +11,25 @@ import ru.peregruzochka.telegram_bot_backend.dto.RegistrationEvent;
 import ru.peregruzochka.telegram_bot_backend.mapper.RegistrationEventMapper;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
 
-@Slf4j
 @Component
+@Slf4j
 @RequiredArgsConstructor
-public class NewRegistrationEventPublisher {
-
-    private final ObjectMapper objectMapper;
+public class SecondQuestionRegistrationEventPublisher {
     private final RegistrationEventMapper registrationEventMapper;
+    private final ObjectMapper objectMapper;
     private final RedisTemplate<String, String> redisTemplate;
 
-    @Value("${spring.data.redis-channel.new-registration}")
+    @Value("${spring.data.redis-channel.second-question}")
     private String channel;
 
     public void publish(Registration registration) {
-        RegistrationEvent registrationEvent = registrationEventMapper.toRegistrationEvent(registration);
+        Long telegramId = registration.getUser().getTelegramId();
+        RegistrationEvent registrationEvent = registrationEventMapper.toRegistrationEventWithTgId(registration, telegramId);
         try {
-            String event = objectMapper.writeValueAsString(registrationEvent);
-            log.info("New registration event: {}", event);
-            redisTemplate.convertAndSend(channel, event);
+            String message = objectMapper.writeValueAsString(registrationEvent);
+            redisTemplate.convertAndSend(channel, message);
+            log.info("Second question registration event published: {}", message);
+
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
