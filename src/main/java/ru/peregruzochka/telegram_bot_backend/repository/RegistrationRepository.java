@@ -27,4 +27,11 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
            order by r.timeslot.startTime
            """)
     List<Registration> findBetween(LocalDateTime start, LocalDateTime end);
+
+    @Query("""
+           select r from Registration r
+           where r.timeslot.startTime < :time
+           and r.confirmStatus = "NOT_CONFIRMED"
+           """)
+    List<Registration> findNotConfirmedAfterTime(LocalDateTime time);
 }

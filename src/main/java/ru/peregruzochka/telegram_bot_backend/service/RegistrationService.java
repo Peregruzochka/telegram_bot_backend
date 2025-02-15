@@ -23,6 +23,7 @@ import java.util.UUID;
 
 import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.RegistrationType.NEW_USER;
 import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.RegistrationType.REGULAR_USER;
+import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.NOT_CONFIRMED;
 
 
 @Slf4j
@@ -87,7 +88,7 @@ public class RegistrationService {
         savedTimeSlot.setIsAvailable(false);
         registration.setTimeslot(savedTimeSlot);
 
-        registration.setConfirmed(false);
+        registration.setConfirmStatus(NOT_CONFIRMED);
         Registration savedRegistration = registrationRepository.save(registration);
 
         log.info("Registration added: {}", savedRegistration);
@@ -136,6 +137,14 @@ public class RegistrationService {
         LocalDateTime end = start.plusDays(1);
         List<Registration> registrations = registrationRepository.findBetween(start, end);
         log.info("Today registrations found: {}", registrations.size());
+        return registrations;
+    }
+
+    @Transactional
+    public List<Registration> getNotConfirmed() {
+        LocalDateTime time = LocalDateTime.now().plusDays(1);
+        List<Registration> registrations = registrationRepository.findNotConfirmedAfterTime(time);
+        log.info("NOT_CONFIRMED registrations found: {}", registrations.size());
         return registrations;
     }
 }

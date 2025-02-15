@@ -50,8 +50,9 @@ public class Registration {
     @JoinColumn(name = "timeslot_id")
     private TimeSlot timeslot;
 
-    @Column(nullable = false)
-    private Boolean confirmed;
+    @Column(name = "confirm_status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ConfirmStatus confirmStatus;
 
     @Column(name = "registration_type", nullable = false)
     @Enumerated(EnumType.STRING)

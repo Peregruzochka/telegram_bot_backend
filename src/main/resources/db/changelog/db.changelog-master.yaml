@@ -15,5 +15,6 @@ databaseChangeLog:
       file: db/changelog/changeset/v007_cancel_add_start_time.sql
   - include:
       file: db/changelog/changeset/v008_registration_drop_not_null.sql
-
+  - include:
+      file: db/changelog/changeset/v009_confirm_status_enum.sql
 

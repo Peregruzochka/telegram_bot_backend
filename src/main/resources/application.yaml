@@ -26,4 +26,7 @@ logging:
 server:
   port: 8081
 
+scheduler:
+  get-non-confirmed: 0 */5 * * * *
+
 
