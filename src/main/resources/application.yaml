@@ -12,6 +12,7 @@ spring:
     redis-channel:
       new-registration: create-registration
       not-confirmed: not-confirmed
+      confirmed: confirmed
 
   jpa:
     hibernate:

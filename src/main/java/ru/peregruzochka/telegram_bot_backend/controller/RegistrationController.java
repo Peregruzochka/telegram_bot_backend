@@ -55,4 +55,11 @@ public class RegistrationController {
         Registration registration = registrationService.confirm(registrationId);
         return registrationMapper.toRegistrationDto(registration);
     }
+
+    @PutMapping("/{registration-id}/decline")
+    public RegistrationDto declineRegistration(@PathVariable("registration-id") UUID registrationId) {
+        Registration registration = registrationService.decline(registrationId);
+        return registrationMapper.toRegistrationDto(registration);
+    }
+
 }

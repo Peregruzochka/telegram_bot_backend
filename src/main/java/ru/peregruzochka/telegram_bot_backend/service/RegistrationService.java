@@ -9,6 +9,7 @@ import ru.peregruzochka.telegram_bot_backend.model.Lesson;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
 import ru.peregruzochka.telegram_bot_backend.model.User;
+import ru.peregruzochka.telegram_bot_backend.redis.ConfirmRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.redis.NewRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.repository.ChildRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.LessonRepository;
@@ -26,6 +27,7 @@ import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.Registra
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.CONFIRMED;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.FIRST_QUESTION;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.NOT_CONFIRMED;
+import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.USER_CANCELLED;
 
 
 @Slf4j
@@ -38,6 +40,7 @@ public class RegistrationService {
     private final TimeSlotRepository timeSlotRepository;
     private final ChildRepository childRepository;
     private final NewRegistrationEventPublisher newRegistrationEventPublisher;
+    private final ConfirmRegistrationEventPublisher confirmRegistrationEventPublisher;
 
     @Transactional
     public Registration addRegistration(Registration registration) {
@@ -159,6 +162,17 @@ public class RegistrationService {
 
         registration.setConfirmStatus(CONFIRMED);
         log.info("Confirm registration: {}", registration);
+        confirmRegistrationEventPublisher.publish(registration);
+        return registrationRepository.save(registration);
+    }
+
+    @Transactional
+    public Registration decline(UUID registrationId) {
+        Registration registration = registrationRepository.findById(registrationId)
+                .orElseThrow(() -> new IllegalArgumentException("Registration not found"));
+
+        registration.setConfirmStatus(USER_CANCELLED);
+        log.info("Decline registration: {}", registration);
         return registrationRepository.save(registration);
     }
 }
