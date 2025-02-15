@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 public class RegistrationEvent {
+    private UUID registrationId;
     private String userName;
     private String childName;
     private String childrenBirthday;

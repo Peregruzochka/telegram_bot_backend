@@ -8,6 +8,7 @@ import ru.peregruzochka.telegram_bot_backend.model.Registration;
 public class RegistrationEventMapper {
     public RegistrationEvent toRegistrationEvent(Registration registration) {
         return RegistrationEvent.builder()
+                .registrationId(registration.getId())
                 .userName(registration.getUser().getUserName())
                 .childName(registration.getChild().getChildName())
                 .childrenBirthday(registration.getChild().getBirthday())
