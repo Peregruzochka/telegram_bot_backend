@@ -10,6 +10,7 @@ import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
 import ru.peregruzochka.telegram_bot_backend.model.User;
 import ru.peregruzochka.telegram_bot_backend.redis.ConfirmRegistrationEventPublisher;
+import ru.peregruzochka.telegram_bot_backend.redis.LocalCancelPublisher;
 import ru.peregruzochka.telegram_bot_backend.redis.NewRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.repository.ChildRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.LessonRepository;
@@ -41,6 +42,7 @@ public class RegistrationService {
     private final ChildRepository childRepository;
     private final NewRegistrationEventPublisher newRegistrationEventPublisher;
     private final ConfirmRegistrationEventPublisher confirmRegistrationEventPublisher;
+    private final LocalCancelPublisher localCancelPublisher;
 
     @Transactional
     public Registration addRegistration(Registration registration) {
@@ -173,6 +175,7 @@ public class RegistrationService {
 
         registration.setConfirmStatus(USER_CANCELLED);
         log.info("Decline registration: {}", registration);
+        localCancelPublisher.publish(registrationId);
         return registrationRepository.save(registration);
     }
 }

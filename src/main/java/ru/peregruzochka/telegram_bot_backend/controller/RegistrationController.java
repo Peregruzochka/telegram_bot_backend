@@ -61,5 +61,4 @@ public class RegistrationController {
         Registration registration = registrationService.decline(registrationId);
         return registrationMapper.toRegistrationDto(registration);
     }
-
 }

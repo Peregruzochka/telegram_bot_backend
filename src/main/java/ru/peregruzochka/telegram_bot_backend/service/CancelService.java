@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.peregruzochka.telegram_bot_backend.model.Cancel;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
+import ru.peregruzochka.telegram_bot_backend.redis.CancelEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.repository.CancelRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.RegistrationRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotRepository;
@@ -22,6 +23,7 @@ public class CancelService {
     private final RegistrationRepository registrationRepository;
     private final CancelRepository cancelRepository;
     private final TimeSlotRepository timeSlotRepository;
+    private final CancelEventPublisher cancelEventPublisher;
 
 
     @Transactional
@@ -48,6 +50,8 @@ public class CancelService {
 
         Cancel savedCancel = cancelRepository.save(cancel);
         log.info("Saved cancel: {}", savedCancel);
+
+        cancelEventPublisher.publish(savedCancel, timeSlot);
         return savedCancel;
     }
 }
