@@ -9,8 +9,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import ru.peregruzochka.telegram_bot_backend.dto.LocalCancelEvent;
 
-import java.util.UUID;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
