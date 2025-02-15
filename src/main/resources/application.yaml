@@ -11,6 +11,7 @@ spring:
   data:
     redis-channel:
       new-registration: create-registration
+      not-confirmed: not-confirmed
 
   jpa:
     hibernate:

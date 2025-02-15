@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
+import ru.peregruzochka.telegram_bot_backend.redis.NotConfirmedRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.service.RegistrationService;
 
 import java.util.List;
@@ -13,9 +14,11 @@ import java.util.List;
 public class ConfirmScheduler {
 
     private final RegistrationService registrationService;
+    private final NotConfirmedRegistrationEventPublisher notConfirmedRegistrationEventPublisher;
 
     @Scheduled(cron = "${scheduler.get-non-confirmed}")
     public void schedule() {
         List<Registration> registrations = registrationService.getNotConfirmed();
+        registrations.forEach(notConfirmedRegistrationEventPublisher::publish);
     }
 }
