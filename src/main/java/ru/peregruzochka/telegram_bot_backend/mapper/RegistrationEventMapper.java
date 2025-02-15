@@ -9,6 +9,22 @@ public class RegistrationEventMapper {
     public RegistrationEvent toRegistrationEvent(Registration registration) {
         return RegistrationEvent.builder()
                 .registrationId(registration.getId())
+                .telegramId(0L)
+                .userName(registration.getUser().getUserName())
+                .childName(registration.getChild().getChildName())
+                .childrenBirthday(registration.getChild().getBirthday())
+                .teacherName(registration.getTimeslot().getTeacher().getName())
+                .lessonName(registration.getLesson().getName())
+                .registrationType(registration.getType().toString())
+                .startTime(registration.getTimeslot().getStartTime())
+                .endTime(registration.getTimeslot().getEndTime())
+                .build();
+    }
+
+    public RegistrationEvent toRegistrationEventWithTgId(Registration registration, Long telegramId) {
+        return RegistrationEvent.builder()
+                .registrationId(registration.getId())
+                .telegramId(telegramId)
                 .userName(registration.getUser().getUserName())
                 .childName(registration.getChild().getChildName())
                 .childrenBirthday(registration.getChild().getBirthday())

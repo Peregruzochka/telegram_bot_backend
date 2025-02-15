@@ -19,6 +19,7 @@ import java.util.UUID;
 @ToString
 public class RegistrationEvent {
     private UUID registrationId;
+    private Long telegramId;
     private String userName;
     private String childName;
     private String childrenBirthday;

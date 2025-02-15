@@ -18,18 +18,18 @@ public class NotConfirmedRegistrationEventPublisher {
 
     private final RegistrationEventMapper registrationEventMapper;
     private final ObjectMapper objectMapper;
-    private final RedisTemplate<Object, Object> redisTemplate;
+    private final RedisTemplate<String, String> redisTemplate;
 
     @Value("${spring.data.redis-channel.not-confirmed}")
     private String channel;
 
     public void publish(Registration registration) {
         try {
-            RegistrationEvent registrationEvent = registrationEventMapper.toRegistrationEvent(registration);
+            Long telegramId = registration.getUser().getTelegramId();
+            RegistrationEvent registrationEvent = registrationEventMapper.toRegistrationEventWithTgId(registration, telegramId);
             String message = objectMapper.writeValueAsString(registrationEvent);
-            redisTemplate.convertAndSend(channel, message);
             log.info("Not-confirmed event published: {}", message);
-
+            redisTemplate.convertAndSend(channel, message);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
