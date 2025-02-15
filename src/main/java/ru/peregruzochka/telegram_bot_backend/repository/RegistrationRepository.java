@@ -34,4 +34,11 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
            and r.confirmStatus = "NOT_CONFIRMED"
            """)
     List<Registration> findNotConfirmedAfterTime(LocalDateTime time);
+
+    @Query("""
+           select r from Registration r
+           where r.timeslot.startTime < :time
+           and r.confirmStatus = "FIRST_QUESTION"
+           """)
+    List<Registration> findFirstQuestionAfterTime(LocalDateTime time);
 }

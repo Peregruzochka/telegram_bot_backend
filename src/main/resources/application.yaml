@@ -15,6 +15,7 @@ spring:
       confirmed: confirmed
       local-cancel: local-cancel
       cancel: cancel
+      first-question: first-question
 
   jpa:
     hibernate:

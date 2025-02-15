@@ -28,6 +28,7 @@ import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.Registra
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.CONFIRMED;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.FIRST_QUESTION;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.NOT_CONFIRMED;
+import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.SECOND_QUESTION;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.USER_CANCELLED;
 
 
@@ -158,6 +159,16 @@ public class RegistrationService {
     }
 
     @Transactional
+    public List<Registration> getFirstQuestionRegistration() {
+        LocalDateTime time = LocalDateTime.now().plusDays(1).plusHours(3);
+        List<Registration> registrations = registrationRepository.findFirstQuestionAfterTime(time);
+        log.info("FIRST_QUESTION registrations found: {}", registrations.size());
+        registrations.forEach(registration -> registration.setConfirmStatus(SECOND_QUESTION));
+        registrationRepository.saveAll(registrations);
+        return registrations;
+    }
+
+    @Transactional
     public Registration confirm(UUID registrationId) {
         Registration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new IllegalArgumentException("Registration not found"));
@@ -178,4 +189,6 @@ public class RegistrationService {
         localCancelPublisher.publish(registrationId);
         return registrationRepository.save(registration);
     }
+
+
 }
