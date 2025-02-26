@@ -21,4 +21,12 @@ public class UserService {
         log.info("Get user by tgId {}: {}", telegramId, user);
         return user;
     }
+
+    @Transactional(readOnly = true)
+    public User getUserByPhone(String phone) {
+        User user = userRepository.findByPhone(phone)
+                .orElse(null);
+        log.info("Get user by phone {}: {}", phone, user);
+        return user;
+    }
 }

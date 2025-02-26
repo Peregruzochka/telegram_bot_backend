@@ -37,6 +37,12 @@ public class TimeSlotController {
         return timeSlotMapper.toTimeSlotDtoList(timeSlots);
     }
 
+    @GetMapping("/available-by-date")
+    public List<TimeSlotDto> getTeacherAvailableTimeSlotsByDate(@RequestParam("teacher-id") UUID teacherId, @RequestParam LocalDate date) {
+        List<TimeSlot> timeSlots = timeSlotService.getTeacherAvailableTimeSlotsByDate(teacherId, date);
+        return timeSlotMapper.toTimeSlotDtoList(timeSlots);
+    }
+
     @PostMapping
     public TimeSlotDto addTimeSlot(@RequestBody TimeSlotDto timeSlotDto) {
         TimeSlot timeSlot = timeSlotMapper.toTimeSlotEntity(timeSlotDto);
@@ -47,5 +53,11 @@ public class TimeSlotController {
     @DeleteMapping("/{timeslot-id}")
     public void deleteTimeSlot(@PathVariable("timeslot-id") UUID timeslotId) {
         timeSlotService.removeTimeSlot(timeslotId);
+    }
+
+    @GetMapping("/{timeslot-id}")
+    public TimeSlotDto getTimeSlot(@PathVariable("timeslot-id") UUID timeslotId) {
+        TimeSlot timeSlot = timeSlotService.getTimeSlot(timeslotId);
+        return timeSlotMapper.toTimeSlotDto(timeSlot);
     }
 }

@@ -22,4 +22,9 @@ public class UserController {
         User user = userService.getUserByTelegramId(telegramId);
         return userMapper.toUserDto(user);
     }
+    @GetMapping("/phone")
+    public UserDto getUserByPhone(@RequestParam(name = "phone") String phone) {
+        User user = userService.getUserByPhone(phone);
+        return userMapper.toUserDto(user);
+    }
 }

@@ -34,7 +34,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "telegram_id", nullable = false)
+    @Column(name = "telegram_id")
     private Long telegramId;
 
     @Column(nullable = false, length = 16)

@@ -47,6 +47,18 @@ public class TimeSlotService {
         return timeSlots;
     }
 
+    @Transactional(readOnly = true)
+    public List<TimeSlot> getTeacherAvailableTimeSlotsByDate(UUID teacherId, LocalDate date) {
+        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found")
+        );
+        LocalDateTime from = date.atStartOfDay();
+        LocalDateTime to = from.plusDays(1);
+        List<TimeSlot> timeSlots = timeSlotRepository.getTeacherAvailableTimeSlots(teacher, from, to);
+        log.info("Get available time slot list ({}) for teacher {}", timeSlots.size(), teacher);
+        return timeSlots;
+    }
+
     @Transactional
     public TimeSlot addTimeSlot(TimeSlot newTimeSlot) {
         LocalDateTime startTime = newTimeSlot.getStartTime();
@@ -95,4 +107,15 @@ public class TimeSlotService {
         timeSlotRepository.deleteById(timeslotId);
         log.info("Removed time slot {}", timeslotId);
     }
+
+    @Transactional(readOnly = true)
+    public TimeSlot getTimeSlot(UUID timeslotId) {
+        TimeSlot timeSlot = timeSlotRepository.findById(timeslotId).orElseThrow(
+                () -> new IllegalArgumentException("TimeSlot not found")
+        );
+        log.info("Get time slot {}", timeSlot);
+        return timeSlot;
+    }
+
+
 }
