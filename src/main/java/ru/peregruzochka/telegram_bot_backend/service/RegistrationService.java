@@ -149,6 +149,15 @@ public class RegistrationService {
         return registrations;
     }
 
+    @Transactional(readOnly = true)
+    public List<Registration> getAllRegistrationByDate(LocalDate date) {
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+        List<Registration> registrations = registrationRepository.findBetween(start, end);
+        log.info("Registrations by {} found: {}", date, registrations.size());
+        return registrations;
+    }
+
     @Transactional
     public List<Registration> getNotConfirmed() {
         LocalDateTime time = LocalDateTime.now().plusDays(1);
@@ -222,4 +231,5 @@ public class RegistrationService {
             return registration;
         }
     }
+
 }

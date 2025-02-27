@@ -14,6 +14,7 @@ import ru.peregruzochka.telegram_bot_backend.mapper.RegistrationMapper;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.service.RegistrationService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -49,6 +50,13 @@ public class RegistrationController {
         List<Registration> registrations = registrationService.getAllRegistrationByToday();
         return registrationMapper.toRegistrationDtoList(registrations);
     }
+
+    @GetMapping("/search-by-date")
+    public List<RegistrationDto> getAllRegistrationsByDate(@RequestParam("date") LocalDate date) {
+        List<Registration> registrations = registrationService.getAllRegistrationByDate(date);
+        return registrationMapper.toRegistrationDtoList(registrations);
+    }
+
 
     @PutMapping("/{registration-id}/confirm")
     public RegistrationDto confirmRegistration(@PathVariable("registration-id") UUID registrationId) {
