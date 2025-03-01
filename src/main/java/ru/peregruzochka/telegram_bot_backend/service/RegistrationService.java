@@ -100,6 +100,10 @@ public class RegistrationService {
         registration.setConfirmStatus(NOT_CONFIRMED);
         Registration savedRegistration = registrationRepository.save(registration);
 
+        if (registrationTimeSlot.getStartTime().isAfter(LocalDateTime.now().minusDays(1))) {
+            registration.setConfirmStatus(CONFIRMED);
+        }
+
         log.info("Registration added: {}", savedRegistration);
         newRegistrationEventPublisher.publish(savedRegistration);
         return savedRegistration;
