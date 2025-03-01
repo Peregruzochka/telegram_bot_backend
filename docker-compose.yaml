@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13.3
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: peregruzochka
+      POSTGRES_PASSWORD: e8a48653851e28c69d0506508fb27fc5
+      POSTGRES_DB: business_db
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+
+  backend:
+    image: tg-bot-backend:latest
+    container_name: backend
+    restart: always
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/business_db
+      SPRING_DATASOURCE_USERNAME: peregruzochka
+      SPRING_DATASOURCE_PASSWORD: e8a48653851e28c69d0506508fb27fc5
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    ports:
+      - "8081:8081"
+
+  users:
+    image: tg-bot-user:latest
+    container_name: tg-bot-user
+    restart: always
+    depends_on:
+      - backend
+      - redis
+    environment:
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    ports:
+      - "8080:8080"
+
+  admin:
+    image: tg-bot-admin:latest
+    container_name: tg-bot-admin
+    restart: always
+    depends_on:
+      - backend
+      - redis
+    environment:
+      SPRING_REDIS_HOST: redis
+      SPRING_REDIS_PORT: 6379
+    ports:
+      - "8082:8082"
+
