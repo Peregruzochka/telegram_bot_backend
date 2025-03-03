@@ -20,7 +20,8 @@ services:
       - "6379:6379"
 
   backend:
-    image: tg-bot-backend:latest
+    build: .
+    pull_policy: build
     container_name: backend
     restart: always
     depends_on:
@@ -36,7 +37,8 @@ services:
       - "8081:8081"
 
   users:
-    image: tg-bot-user:latest
+    build: C:\Users\Peregruzochka\Documents\GitHub\telegram_bot
+    pull_policy: build
     container_name: tg-bot-user
     restart: always
     depends_on:
@@ -49,7 +51,8 @@ services:
       - "8080:8080"
 
   admin:
-    image: tg-bot-admin:latest
+    build: C:\Users\Peregruzochka\Documents\GitHub\tg_bot_admin
+    pull_policy: build
     container_name: tg-bot-admin
     restart: always
     depends_on:
