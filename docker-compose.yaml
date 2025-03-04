@@ -28,6 +28,7 @@ services:
       - postgres
       - redis
     environment:
+      SPRING_PROFILES_ACTIVE: prod
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/business_db
       SPRING_DATASOURCE_USERNAME: peregruzochka
       SPRING_DATASOURCE_PASSWORD: e8a48653851e28c69d0506508fb27fc5
@@ -59,6 +60,7 @@ services:
       - backend
       - redis
     environment:
+      SPRING_PROFILES_ACTIVE: prod
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
     ports:

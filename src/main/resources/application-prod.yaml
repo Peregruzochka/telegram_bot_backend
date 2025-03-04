@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: telegram_bot_backend
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+
+    redis-channel:
+      new-registration: create-registration
+      not-confirmed: not-confirmed
+      confirmed: confirmed
+      local-cancel: local-cancel
+      cancel: cancel
+      first-question: first-question
+      second-question: second-question
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+logging:
+  level:
+    org.springframework: INFO
+    ru.peregruzochka.task_management_system: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%level] %logger{36} - %msg%n"
+
+server:
+  port: 8081
+
+scheduler:
+  get-non-confirmed: 0 */1 * * * *
