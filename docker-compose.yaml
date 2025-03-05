@@ -46,6 +46,7 @@ services:
       - backend
       - redis
     environment:
+      SPRING_PROFILES_ACTIVE: prod
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PORT: 6379
     ports:
