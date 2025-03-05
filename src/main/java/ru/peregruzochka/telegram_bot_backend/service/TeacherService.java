@@ -24,6 +24,7 @@ public class TeacherService {
         Teacher teacher = Teacher.builder()
                 .name(name)
                 .image(savedImage)
+                .hidden(false)
                 .build();
         Teacher savedTeacher = teacherRepository.save(teacher);
         log.info("Teacher added: {}", savedTeacher);

@@ -1,0 +1,2 @@
+ALTER TABLE teachers
+ADD COLUMN hidden_flag BOOLEAN NOT NULL DEFAULT false;

@@ -37,4 +37,4 @@ server:
   port: 8091
 
 scheduler:
-  get-non-confirmed: 0 */5 * * * *
+  get-non-confirmed: 0 */1 * * * *

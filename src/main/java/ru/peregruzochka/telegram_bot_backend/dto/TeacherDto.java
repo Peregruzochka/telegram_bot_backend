@@ -17,4 +17,5 @@ public class TeacherDto {
     private UUID id;
     private String name;
     private UUID imageID;
+    private boolean hidden;
 }

@@ -40,6 +40,9 @@ public class Teacher {
     @JoinColumn(name = "image_id", nullable = false)
     private Image image;
 
+    @Column(name = "hidden_flag", nullable = false)
+    private boolean hidden;
+
     @ToString.Exclude
     @ManyToMany(mappedBy = "teachers")
     private List<Lesson> lessons;

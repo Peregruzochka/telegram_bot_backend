@@ -14,6 +14,7 @@ public class TeacherMapper {
                 .id(teacher.getId())
                 .name(teacher.getName())
                 .imageID(teacher.getImage().getId())
+                .hidden(teacher.isHidden())
                 .build();
     }
 

@@ -19,5 +19,7 @@ databaseChangeLog:
       file: db/changelog/changeset/v009_confirm_status_enum.sql
   - include:
       file: db/changelog/changeset/v010_drop_not_null_telegram_id.sql
+  - include:
+      file: db/changelog/changeset/v011_teachers_hidden_field.sql
 
 
