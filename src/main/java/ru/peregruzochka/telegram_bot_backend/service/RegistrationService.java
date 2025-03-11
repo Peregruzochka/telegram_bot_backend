@@ -100,7 +100,7 @@ public class RegistrationService {
         registration.setConfirmStatus(NOT_CONFIRMED);
         Registration savedRegistration = registrationRepository.save(registration);
 
-        if (registrationTimeSlot.getStartTime().isAfter(LocalDateTime.now().minusDays(1))) {
+        if (LocalDateTime.now().plusDays(1).isAfter(registration.getTimeslot().getStartTime())) {
             registration.setConfirmStatus(CONFIRMED);
         }
 
@@ -174,7 +174,7 @@ public class RegistrationService {
 
     @Transactional
     public List<Registration> getFirstQuestionRegistration() {
-        LocalDateTime time = LocalDateTime.now().plusDays(1).plusHours(3);
+        LocalDateTime time = LocalDateTime.now().plusDays(1).minusHours(3);
         List<Registration> registrations = registrationRepository.findFirstQuestionAfterTime(time);
         log.info("FIRST_QUESTION registrations found: {}", registrations.size());
         registrations.forEach(registration -> registration.setConfirmStatus(SECOND_QUESTION));
@@ -184,7 +184,7 @@ public class RegistrationService {
 
     @Transactional
     public List<Registration> getSecondQuestionRegistration() {
-        LocalDateTime time = LocalDateTime.now().plusDays(1).plusHours(3).plusHours(1);
+        LocalDateTime time = LocalDateTime.now().plusDays(1).minusHours(3).minusHours(1);
         List<Registration> registrations = registrationRepository.findSecondQuestionAfterTime(time);
         log.info("SECOND_QUESTION registrations found: {}", registrations.size());
         registrations.forEach(registration -> registration.setConfirmStatus(AUTO_CANCELLED));
