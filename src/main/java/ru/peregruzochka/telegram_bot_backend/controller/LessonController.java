@@ -1,6 +1,7 @@
 package ru.peregruzochka.telegram_bot_backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,9 +17,11 @@ import ru.peregruzochka.telegram_bot_backend.mapper.LessonMapper;
 import ru.peregruzochka.telegram_bot_backend.model.Lesson;
 import ru.peregruzochka.telegram_bot_backend.service.LessonService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/lessons")
@@ -29,6 +32,7 @@ public class LessonController {
     @GetMapping("/all")
     public List<LessonDto> getAllLessons() {
         List<Lesson> lessons = lessonService.getAllLessons();
+        log.info(LocalDateTime.now().toString());
         return lessonMapper.toLessonDtoList(lessons);
     }
 
