@@ -13,6 +13,12 @@ COPY . .
 RUN ./gradlew build -x test
 
 FROM openjdk:17-jdk-slim
+
+ENV TZ=Europe/Moscow
+RUN apt-get update && apt-get install -y tzdata && \
+    ln -fs /usr/share/zoneinfo/$TZ /etc/localtime && \
+    dpkg-reconfigure -f noninteractive tzdata
+
 ENV ARTIFACT_NAME=telegram_bot_backend-0.0.1-SNAPSHOT.jar
 ENV APP_HOME=/usr/app/
 WORKDIR $APP_HOME
