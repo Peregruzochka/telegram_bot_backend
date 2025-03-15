@@ -14,21 +14,21 @@ import ru.peregruzochka.telegram_bot_backend.model.Registration;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class NotConfirmedRegistrationEventPublisher {
-
+public class QRSenderPublisher {
     private final RegistrationEventMapper registrationEventMapper;
     private final ObjectMapper objectMapper;
     private final RedisTemplate<String, String> redisTemplate;
 
-    @Value("${spring.data.redis-channel.not-confirmed}")
+    @Value("${spring.data.redis-channel.qr-sender}")
     private String channel;
 
     public void publish(Registration registration) {
+        RegistrationEvent registrationEvent = registrationEventMapper.toRegistrationEvent(registration);
+
         try {
-            RegistrationEvent registrationEvent = registrationEventMapper.toRegistrationEvent(registration);
             String message = objectMapper.writeValueAsString(registrationEvent);
-            log.info("Not-confirmed event published: {}", message);
             redisTemplate.convertAndSend(channel, message);
+            log.info("Published QR sender event: {}", registrationEvent);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

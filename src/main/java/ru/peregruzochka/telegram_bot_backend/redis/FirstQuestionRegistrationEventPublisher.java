@@ -24,8 +24,7 @@ public class FirstQuestionRegistrationEventPublisher {
     private String channel;
 
     public void publish(Registration registration) {
-        Long telegramId = registration.getUser().getTelegramId();
-        RegistrationEvent registrationEvent = registrationEventMapper.toRegistrationEventWithTgId(registration, telegramId);
+        RegistrationEvent registrationEvent = registrationEventMapper.toRegistrationEvent(registration);
         try {
             String message = objectMapper.writeValueAsString(registrationEvent);
             redisTemplate.convertAndSend(channel, message);

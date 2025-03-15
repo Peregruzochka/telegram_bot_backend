@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.redis.FirstQuestionRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.redis.NotConfirmedRegistrationEventPublisher;
+import ru.peregruzochka.telegram_bot_backend.redis.QRSenderPublisher;
 import ru.peregruzochka.telegram_bot_backend.redis.SecondQuestionRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.service.RegistrationService;
 
@@ -19,6 +20,7 @@ public class ConfirmScheduler {
     private final NotConfirmedRegistrationEventPublisher notConfirmedRegistrationEventPublisher;
     private final FirstQuestionRegistrationEventPublisher firstQuestionRegistrationEventPublisher;
     private final SecondQuestionRegistrationEventPublisher secondQuestionRegistrationEventPublisher;
+    private final QRSenderPublisher qrSenderPublisher;
 
     @Scheduled(cron = "${scheduler.get-non-confirmed}")
     public void schedule() {
@@ -30,5 +32,8 @@ public class ConfirmScheduler {
 
         List<Registration> registrationsThree = registrationService.getSecondQuestionRegistration();
         registrationsThree.forEach(secondQuestionRegistrationEventPublisher::publish);
+
+        List<Registration> registrationFour = registrationService.getAutoConfirmedRegistration();
+        registrationFour.forEach(qrSenderPublisher::publish);
     }
 }

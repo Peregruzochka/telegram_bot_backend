@@ -27,6 +27,8 @@ import java.util.UUID;
 import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.RegistrationType.NEW_USER;
 import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.RegistrationType.REGULAR_USER;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.AUTO_CANCELLED;
+import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.AUTO_CONFIRMED;
+import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.AUTO_CONFIRMED_QR;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.CONFIRMED;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.FIRST_QUESTION;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.NOT_CONFIRMED;
@@ -98,11 +100,14 @@ public class RegistrationService {
         registration.setTimeslot(savedTimeSlot);
 
         registration.setConfirmStatus(NOT_CONFIRMED);
-        Registration savedRegistration = registrationRepository.save(registration);
 
         if (LocalDateTime.now().plusDays(1).isAfter(registration.getTimeslot().getStartTime())) {
-            registration.setConfirmStatus(CONFIRMED);
+            registration.setConfirmStatus(AUTO_CONFIRMED);
         }
+
+        registration.setCreatedAt(LocalDateTime.now());
+
+        Registration savedRegistration = registrationRepository.save(registration);
 
         log.info("Registration added: {}", savedRegistration);
         newRegistrationEventPublisher.publish(savedRegistration);
@@ -203,6 +208,17 @@ public class RegistrationService {
     }
 
     @Transactional
+    public List<Registration> getAutoConfirmedRegistration() {
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = start.plusHours(1);
+        List<Registration> registrations = registrationRepository.findAutoConfirmedBetween(start, end);
+        log.info("AUTO_CONFIRMED registrations found: {}", registrations.size());
+        registrations.forEach(registration -> registration.setConfirmStatus(AUTO_CONFIRMED_QR));
+        registrationRepository.saveAll(registrations);
+        return registrations;
+    }
+
+    @Transactional
     public Registration confirm(UUID registrationId) {
         Registration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new IllegalArgumentException("Registration not found"));
@@ -235,5 +251,4 @@ public class RegistrationService {
             return registration;
         }
     }
-
 }

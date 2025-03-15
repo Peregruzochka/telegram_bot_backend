@@ -21,6 +21,7 @@ spring:
       cancel: cancel
       first-question: first-question
       second-question: second-question
+      qr-sender: qr-sender
 
   jpa:
     hibernate:
