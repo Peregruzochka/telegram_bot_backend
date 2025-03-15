@@ -21,5 +21,7 @@ databaseChangeLog:
       file: db/changelog/changeset/v010_drop_not_null_telegram_id.sql
   - include:
       file: db/changelog/changeset/v011_teachers_hidden_field.sql
+  - include:
+      file: db/changelog/changeset/v012_registration_create_time.sql
 
 
