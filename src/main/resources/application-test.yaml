@@ -39,3 +39,8 @@ server:
 
 scheduler:
   get-non-confirmed: 0 */1 * * * *
+
+approve-delay:
+  first-approve: 24 # hours before start time
+  second-approve: 7 # hours after first approve
+  cancel-registration: 1 # hours after second approve

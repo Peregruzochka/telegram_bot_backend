@@ -2,6 +2,7 @@ package ru.peregruzochka.telegram_bot_backend.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.peregruzochka.telegram_bot_backend.dto.LocalCancelEvent;
@@ -48,6 +49,16 @@ public class RegistrationService {
     private final NewRegistrationEventPublisher newRegistrationEventPublisher;
     private final ConfirmRegistrationEventPublisher confirmRegistrationEventPublisher;
     private final LocalCancelPublisher localCancelPublisher;
+
+    @Value("${approve-delay.first-approve}")
+    private int firstApproveDelay;
+
+    @Value("${approve-delay.second-approve}")
+    private int secondApproveDelay;
+
+    @Value("${approve-delay.cancel-registration}")
+    private int cancelRegistrationDelay;
+
 
     @Transactional
     public Registration addRegistration(Registration registration) {
@@ -174,7 +185,8 @@ public class RegistrationService {
 
     @Transactional
     public List<Registration> getNotConfirmed() {
-        LocalDateTime time = LocalDateTime.now().plusDays(1);
+        LocalDateTime time = LocalDateTime.now().plusHours(firstApproveDelay);
+
         List<Registration> registrations = registrationRepository.findNotConfirmedAfterTime(time);
         log.info("NOT_CONFIRMED registrations found: {}", registrations.size());
         registrations.forEach(registration -> registration.setConfirmStatus(FIRST_QUESTION));
@@ -184,7 +196,10 @@ public class RegistrationService {
 
     @Transactional
     public List<Registration> getFirstQuestionRegistration() {
-        LocalDateTime time = LocalDateTime.now().plusDays(1).minusHours(3);
+        LocalDateTime time = LocalDateTime.now()
+                .plusHours(firstApproveDelay)
+                .minusHours(secondApproveDelay);
+
         List<Registration> registrations = registrationRepository.findFirstQuestionAfterTime(time);
         log.info("FIRST_QUESTION registrations found: {}", registrations.size());
         registrations.forEach(registration -> registration.setConfirmStatus(SECOND_QUESTION));
@@ -194,7 +209,11 @@ public class RegistrationService {
 
     @Transactional
     public List<Registration> getSecondQuestionRegistration() {
-        LocalDateTime time = LocalDateTime.now().plusDays(1).minusHours(3).minusHours(1);
+        LocalDateTime time = LocalDateTime.now()
+                .plusHours(firstApproveDelay)
+                .minusHours(secondApproveDelay)
+                .minusHours(cancelRegistrationDelay);
+
         List<Registration> registrations = registrationRepository.findSecondQuestionAfterTime(time);
         log.info("SECOND_QUESTION registrations found: {}", registrations.size());
         registrations.forEach(registration -> registration.setConfirmStatus(AUTO_CANCELLED));
