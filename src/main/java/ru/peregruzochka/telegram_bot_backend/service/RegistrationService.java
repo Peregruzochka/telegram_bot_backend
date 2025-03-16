@@ -51,6 +51,17 @@ public class RegistrationService {
 
     @Transactional
     public Registration addRegistration(Registration registration) {
+        TimeSlot registrationTimeSlot = registration.getTimeslot();
+        TimeSlot savedTimeSlot = timeSlotRepository.findById(registrationTimeSlot.getId())
+                .orElseThrow(() -> new IllegalArgumentException("TimeSlot does not exist"));
+
+        if (savedTimeSlot.getIsAvailable()) {
+            savedTimeSlot.setIsAvailable(false);
+            registration.setTimeslot(savedTimeSlot);
+        } else {
+            throw new IllegalArgumentException("TimeSlot is not available");
+        }
+
         if (registration.getType().equals(NEW_USER)) {
             Child newChild = registration.getChild();
             User newUser = registration.getUser();
@@ -92,12 +103,6 @@ public class RegistrationService {
         Lesson savedLesson = lessonRepository.findById(registrationLesson.getId())
                 .orElseThrow(() -> new IllegalArgumentException("Lesson does not exist"));
         registration.setLesson(savedLesson);
-
-        TimeSlot registrationTimeSlot = registration.getTimeslot();
-        TimeSlot savedTimeSlot = timeSlotRepository.findById(registrationTimeSlot.getId())
-                .orElseThrow(() -> new IllegalArgumentException("TimeSlot does not exist"));
-        savedTimeSlot.setIsAvailable(false);
-        registration.setTimeslot(savedTimeSlot);
 
         registration.setConfirmStatus(NOT_CONFIRMED);
 
