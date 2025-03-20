@@ -3,7 +3,7 @@ spring:
     name: telegram_bot_backend
 
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5431/postgres}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5430/postgres}
     username: ${SPRING_DATASOURCE_USERNAME:user}
     password: ${SPRING_DATASOURCE_PASSWORD:password}
     driver-class-name: org.postgresql.Driver
@@ -11,7 +11,7 @@ spring:
   data:
     redis:
       host: ${SPRING_REDIS_HOST:localhost}
-      port: ${SPRING_REDIS_PORT:6378}
+      port: ${SPRING_REDIS_PORT:6377}
 
     redis-channel:
       new-registration: create-registration
@@ -21,7 +21,7 @@ spring:
       cancel: cancel
       first-question: first-question
       second-question: second-question
-
+      qr-sender: qr-sender
   jpa:
     hibernate:
       ddl-auto: none
@@ -34,7 +34,12 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%level] %logger{36} - %msg%n"
 
 server:
-  port: 8081
+  port: 8071
 
 scheduler:
-  get-non-confirmed: 0 */5 * * * *
+  get-non-confirmed: 0 */1 * * * *
+
+approve-delay:
+  first-approve: 24 # hours before start time
+  second-approve: 7 # hours after first approve
+  cancel-registration: 1 # hours after second approve
