@@ -1,5 +1,5 @@
 $path_to_service_name_dir = "C:\Users\Peregruzochka\Documents\GitHub\telegram_bot_backend"
-$project_name = "telegram-bot-backend"
+$project_name = "test-space"
 $docker_file = "docker-compose.test.yaml"
 
 Set-Location -Path $path_to_service_name_dir
