@@ -32,8 +32,13 @@ public class LessonController {
     @GetMapping("/all")
     public List<LessonDto> getAllLessons() {
         List<Lesson> lessons = lessonService.getAllLessons();
-        log.info(LocalDateTime.now().toString());
         return lessonMapper.toLessonDtoList(lessons);
+    }
+
+    @GetMapping("/{lesson-id}")
+    public LessonDto getLesson(@PathVariable("lesson-id") UUID id) {
+        Lesson lesson = lessonService.getLesson(id);
+        return lessonMapper.toLessonDto(lesson);
     }
 
     @PostMapping

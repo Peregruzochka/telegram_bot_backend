@@ -28,6 +28,14 @@ public class LessonService {
         return lessons;
     }
 
+    @Transactional(readOnly = true)
+    public Lesson getLesson(UUID id) {
+        Lesson lesson = lessonRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Lesson not found"));
+        log.info("Get lesson. Lesson: {}", lesson);
+        return lesson;
+    }
+
     @Transactional
     public Lesson addLesson(@RequestBody Lesson newLesson) {
         Lesson lesson = lessonRepository.save(newLesson);
