@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import ru.peregruzochka.telegram_bot_backend.model.UserStatus;
 
 import java.util.List;
 import java.util.UUID;
@@ -19,5 +20,6 @@ public class UserDto {
     private Long telegramId;
     private String name;
     private String phone;
+    private UserStatus status;
     private List<ChildDto> children;
 }

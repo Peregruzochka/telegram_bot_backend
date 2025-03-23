@@ -3,6 +3,8 @@ package ru.peregruzochka.telegram_bot_backend.model;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -42,6 +44,10 @@ public class User {
 
     @Column(name = "user_name", nullable = false, length = 256)
     private String userName;
+
+    @Column(name = "status", nullable = false, length = 16)
+    @Enumerated(EnumType.STRING)
+    private UserStatus status;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

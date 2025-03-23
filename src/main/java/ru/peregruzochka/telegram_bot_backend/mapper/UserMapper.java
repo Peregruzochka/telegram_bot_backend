@@ -20,6 +20,7 @@ public class UserMapper {
                 .telegramId(user.getTelegramId())
                 .name(user.getUserName())
                 .phone(user.getPhone())
+                .status(user.getStatus())
                 .children(childMapper.toChildDtoList(user.getChildren()))
                 .build();
     }
@@ -29,9 +30,8 @@ public class UserMapper {
                 .id(userDto.getId())
                 .telegramId(userDto.getTelegramId())
                 .userName(userDto.getName())
+                .status(userDto.getStatus())
                 .phone(userDto.getPhone())
                 .build();
     }
-
-
 }

@@ -23,5 +23,6 @@ databaseChangeLog:
       file: db/changelog/changeset/v011_teachers_hidden_field.sql
   - include:
       file: db/changelog/changeset/v012_registration_create_time.sql
-
+  - include:
+      file: db/changelog/changeset/v013_user_status.sql
 
