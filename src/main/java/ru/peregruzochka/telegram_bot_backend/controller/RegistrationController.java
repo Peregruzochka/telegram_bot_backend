@@ -32,9 +32,9 @@ public class RegistrationController {
         return registrationMapper.toRegistrationDto(savedRegistration);
     }
 
-    @GetMapping
-    public List<RegistrationDto> getAllUserActiveRegistrations(@RequestParam("user-id") UUID userId) {
-        List<Registration> registrations = registrationService.getAllUserRegistration(userId);
+    @GetMapping("/actual")
+    public List<RegistrationDto> getAllUserActualRegistrations(@RequestParam("user-id") UUID userId) {
+        List<Registration> registrations = registrationService.getAllActualRegistration(userId);
         return registrationMapper.toRegistrationDtoList(registrations);
     }
 

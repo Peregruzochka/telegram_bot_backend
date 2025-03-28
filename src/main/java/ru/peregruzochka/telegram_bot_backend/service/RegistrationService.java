@@ -131,11 +131,11 @@ public class RegistrationService {
     }
 
     @Transactional(readOnly = true)
-    public List<Registration> getAllUserRegistration(UUID userId) {
+    public List<Registration> getAllActualRegistration(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        List<Registration> registrations = registrationRepository.findAllActiveByUser(user);
+        List<Registration> registrations = registrationRepository.findAllActualByUser(user);
         log.info("Registrations found: {}", registrations.size());
         return registrations;
     }

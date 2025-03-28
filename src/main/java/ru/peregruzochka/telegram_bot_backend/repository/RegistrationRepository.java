@@ -12,13 +12,15 @@ import java.util.UUID;
 
 @Repository
 public interface RegistrationRepository extends JpaRepository<Registration, UUID> {
+
     @Query("""
-            select r from Registration r
-            where r.user = ?1
-            and r.type != "CANCEL"
-            order by r.timeslot.startTime
-            """)
-    List<Registration> findAllActiveByUser(User user);
+        select r from Registration r
+        where r.user = ?1
+        and r.type != 'CANCEL'
+        and r.timeslot.startTime > CURRENT_TIMESTAMP
+        order by r.timeslot.startTime
+        """)
+    List<Registration> findAllActualByUser(User user);
 
     @Query("""
            select r from Registration r
@@ -56,4 +58,5 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
             and r.confirmStatus = "AUTO_CONFIRMED"
             """)
     List<Registration> findAutoConfirmedBetween(LocalDateTime start, LocalDateTime end);
+
 }
