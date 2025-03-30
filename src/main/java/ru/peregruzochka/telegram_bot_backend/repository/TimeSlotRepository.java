@@ -19,6 +19,7 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, UUID> {
         and t.isAvailable = true
         and t.startTime >= :from
         and t.endTime <= :to
+        order by t.startTime
         """)
     List<TimeSlot> getTeacherAvailableTimeSlots(Teacher teacher, LocalDateTime from, LocalDateTime to);
 

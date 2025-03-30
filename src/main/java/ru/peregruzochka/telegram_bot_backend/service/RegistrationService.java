@@ -27,6 +27,7 @@ import ru.peregruzochka.telegram_bot_backend.repository.UserRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -76,32 +77,33 @@ public class RegistrationService {
 
         registration.getTimeslot().setIsAvailable(false);
         registration.getTimeslot().setTeacher(dbTeacher);
+        timeSlotRepository.save(registration.getTimeslot());
 
         User user = registration.getUser();
-        switch (user.getStatus()) {
-            case NEW -> userRepository.save(user);
-            case REGULAR -> checkUser(user);
-            case EDITING -> {
-                checkUser(user);
-                User editingUser = userRepository.findById(user.getId()).orElseThrow();
-                editingUser.setUserName(user.getUserName());
-                editingUser.setStatus(UserStatus.REGULAR);
-                userRepository.save(editingUser);
-            }
-        }
+        User dbUser = computeUser(user);
 
         Child child = registration.getChild();
+        computeChild(child, dbUser);
+
+        registration.setUser(dbUser);
+        ConfirmStatus status = chooseConfirmStatus(registration);
+        registration.setConfirmStatus(status);
+        registration.setCreatedAt(LocalDateTime.now());
+        Registration newRegistration = registrationRepository.save(registration);
+        newRegistrationEventPublisher.publish(newRegistration);
+        log.info("New registration: {}", newRegistration);
+        return newRegistration;
+    }
+
+    private void computeChild(Child child, User user) {
         switch (child.getStatus()) {
             case NEW -> {
                 child.setParent(user);
+                user.getChildren().add(child);
                 childRepository.save(child);
-                if (user.getChildren() == null) {
-                    user.setChildren(List.of(child));
-                } else {
-                    user.getChildren().add(child);
-                }
             }
             case REGULAR -> checkChild(child);
+
             case EDITING -> {
                 checkChild(child);
                 Child editingChild = childRepository.findById(child.getId()).orElseThrow();
@@ -110,16 +112,24 @@ public class RegistrationService {
                 editingChild.setStatus(ChildStatus.REGULAR);
                 childRepository.save(editingChild);
             }
-        }
+        };
+    }
 
-        ConfirmStatus status = chooseConfirmStatus(registration);
-        registration.setConfirmStatus(status);
+    private User computeUser(User user) {
+        return switch (user.getStatus()) {
+            case NEW-> {
+                user.setChildren(new ArrayList<>());
+                yield userRepository.save(user);
+            }
 
-        registration.setCreatedAt(LocalDateTime.now());
-        Registration newRegistration = registrationRepository.save(registration);
-        newRegistrationEventPublisher.publish(newRegistration);
-        log.info("New registration: {}", newRegistration);
-        return newRegistration;
+            case REGULAR -> checkUser(user);
+            case EDITING -> {
+                User dbUser = checkUser(user);
+                dbUser.setUserName(user.getUserName());
+                dbUser.setStatus(UserStatus.REGULAR);
+                yield userRepository.save(dbUser);
+            }
+        };
     }
 
     private ConfirmStatus chooseConfirmStatus(Registration registration) {
@@ -131,14 +141,14 @@ public class RegistrationService {
         }
     }
 
-    private void checkChild(Child child) {
-        childRepository.findById(child.getId()).orElseThrow(
+    private Child checkChild(Child child) {
+        return childRepository.findById(child.getId()).orElseThrow(
                 () -> new IllegalArgumentException("Child not found: " + child.getId())
         );
     }
 
-    private void checkUser(User user) {
-        userRepository.findById(user.getId()).orElseThrow(
+    private User checkUser(User user) {
+        return userRepository.findById(user.getId()).orElseThrow(
                 () -> new IllegalStateException("User with id " + user.getId() + " not found")
         );
     }
@@ -150,9 +160,12 @@ public class RegistrationService {
     }
 
     private void checkTimeSlot(TimeSlot timeSlot) {
-        timeSlotRepository.findById(timeSlot.getId()).orElseThrow(
+        TimeSlot dbTimeSlot = timeSlotRepository.findById(timeSlot.getId()).orElseThrow(
                 () -> new IllegalArgumentException("TimeSlot not found: " + timeSlot.getId())
         );
+        if (!dbTimeSlot.getIsAvailable()) {
+            throw new IllegalArgumentException("TimeSlot is not available");
+        }
     }
 
     @Transactional(readOnly = true)
