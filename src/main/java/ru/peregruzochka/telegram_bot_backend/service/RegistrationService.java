@@ -64,7 +64,6 @@ public class RegistrationService {
     @Value("${approve-delay.cancel-registration}")
     private int cancelRegistrationDelay;
 
-
     @Transactional
     public Registration addRegistration(Registration registration) {
         checkLesson(registration.getLesson());
@@ -93,79 +92,6 @@ public class RegistrationService {
         newRegistrationEventPublisher.publish(newRegistration);
         log.info("New registration: {}", newRegistration);
         return newRegistration;
-    }
-
-    private void computeChild(Child child, User user) {
-        switch (child.getStatus()) {
-            case NEW -> {
-                child.setParent(user);
-                user.getChildren().add(child);
-                childRepository.save(child);
-            }
-            case REGULAR -> checkChild(child);
-
-            case EDITING -> {
-                checkChild(child);
-                Child editingChild = childRepository.findById(child.getId()).orElseThrow();
-                editingChild.setChildName(child.getChildName());
-                editingChild.setBirthday(child.getBirthday());
-                editingChild.setStatus(ChildStatus.REGULAR);
-                childRepository.save(editingChild);
-            }
-        };
-    }
-
-    private User computeUser(User user) {
-        return switch (user.getStatus()) {
-            case NEW-> {
-                user.setChildren(new ArrayList<>());
-                yield userRepository.save(user);
-            }
-
-            case REGULAR -> checkUser(user);
-            case EDITING -> {
-                User dbUser = checkUser(user);
-                dbUser.setUserName(user.getUserName());
-                dbUser.setStatus(UserStatus.REGULAR);
-                yield userRepository.save(dbUser);
-            }
-        };
-    }
-
-    private ConfirmStatus chooseConfirmStatus(Registration registration) {
-        LocalDateTime startTime = registration.getTimeslot().getStartTime();
-        if (LocalDateTime.now().plusDays(1).isAfter(startTime)) {
-            return AUTO_CONFIRMED;
-        } else  {
-            return NOT_CONFIRMED;
-        }
-    }
-
-    private Child checkChild(Child child) {
-        return childRepository.findById(child.getId()).orElseThrow(
-                () -> new IllegalArgumentException("Child not found: " + child.getId())
-        );
-    }
-
-    private User checkUser(User user) {
-        return userRepository.findById(user.getId()).orElseThrow(
-                () -> new IllegalStateException("User with id " + user.getId() + " not found")
-        );
-    }
-
-    private void checkLesson(Lesson lesson) {
-        lessonRepository.findById(lesson.getId()).orElseThrow(
-                () -> new IllegalArgumentException("Lesson not found: " + lesson.getId())
-        );
-    }
-
-    private void checkTimeSlot(TimeSlot timeSlot) {
-        TimeSlot dbTimeSlot = timeSlotRepository.findById(timeSlot.getId()).orElseThrow(
-                () -> new IllegalArgumentException("TimeSlot not found: " + timeSlot.getId())
-        );
-        if (!dbTimeSlot.getIsAvailable()) {
-            throw new IllegalArgumentException("TimeSlot is not available");
-        }
     }
 
     @Transactional(readOnly = true)
@@ -294,6 +220,15 @@ public class RegistrationService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public Registration getRegistrationById(UUID id) {
+        Registration registration = registrationRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Registration not found")
+        );
+        log.info("Registration found: {}", registration);
+        return registration;
+    }
+
     @Transactional
     public Registration decline(UUID registrationId) {
         Registration registration = registrationRepository.findById(registrationId)
@@ -311,6 +246,80 @@ public class RegistrationService {
             return registrationRepository.save(registration);
         } else {
             return registration;
+        }
+    }
+
+
+    private void computeChild(Child child, User user) {
+        switch (child.getStatus()) {
+            case NEW -> {
+                child.setParent(user);
+                user.getChildren().add(child);
+                childRepository.save(child);
+            }
+            case REGULAR -> checkChild(child);
+
+            case EDITING -> {
+                checkChild(child);
+                Child editingChild = childRepository.findById(child.getId()).orElseThrow();
+                editingChild.setChildName(child.getChildName());
+                editingChild.setBirthday(child.getBirthday());
+                editingChild.setStatus(ChildStatus.REGULAR);
+                childRepository.save(editingChild);
+            }
+        }
+    }
+
+    private User computeUser(User user) {
+        return switch (user.getStatus()) {
+            case NEW-> {
+                user.setChildren(new ArrayList<>());
+                yield userRepository.save(user);
+            }
+
+            case REGULAR -> checkUser(user);
+            case EDITING -> {
+                User dbUser = checkUser(user);
+                dbUser.setUserName(user.getUserName());
+                dbUser.setStatus(UserStatus.REGULAR);
+                yield userRepository.save(dbUser);
+            }
+        };
+    }
+
+    private ConfirmStatus chooseConfirmStatus(Registration registration) {
+        LocalDateTime startTime = registration.getTimeslot().getStartTime();
+        if (LocalDateTime.now().plusDays(1).isAfter(startTime)) {
+            return AUTO_CONFIRMED;
+        } else  {
+            return NOT_CONFIRMED;
+        }
+    }
+
+    private void checkChild(Child child) {
+        childRepository.findById(child.getId()).orElseThrow(
+                () -> new IllegalArgumentException("Child not found: " + child.getId())
+        );
+    }
+
+    private User checkUser(User user) {
+        return userRepository.findById(user.getId()).orElseThrow(
+                () -> new IllegalStateException("User with id " + user.getId() + " not found")
+        );
+    }
+
+    private void checkLesson(Lesson lesson) {
+        lessonRepository.findById(lesson.getId()).orElseThrow(
+                () -> new IllegalArgumentException("Lesson not found: " + lesson.getId())
+        );
+    }
+
+    private void checkTimeSlot(TimeSlot timeSlot) {
+        TimeSlot dbTimeSlot = timeSlotRepository.findById(timeSlot.getId()).orElseThrow(
+                () -> new IllegalArgumentException("TimeSlot not found: " + timeSlot.getId())
+        );
+        if (!dbTimeSlot.getIsAvailable()) {
+            throw new IllegalArgumentException("TimeSlot is not available");
         }
     }
 }

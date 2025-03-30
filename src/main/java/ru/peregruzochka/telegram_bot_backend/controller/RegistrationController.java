@@ -9,7 +9,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ru.peregruzochka.telegram_bot_backend.dto.CreateAtRegistrationDto;
 import ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto;
+import ru.peregruzochka.telegram_bot_backend.mapper.CreatedAtMapper;
 import ru.peregruzochka.telegram_bot_backend.mapper.RegistrationMapper;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.service.RegistrationService;
@@ -24,6 +26,7 @@ import java.util.UUID;
 public class RegistrationController {
     private final RegistrationService registrationService;
     private final RegistrationMapper registrationMapper;
+    private final CreatedAtMapper createdAtMapper;
 
     @PostMapping
     public RegistrationDto addRegistration(@RequestBody RegistrationDto registrationDto) {
@@ -68,5 +71,11 @@ public class RegistrationController {
     public RegistrationDto declineRegistration(@PathVariable("registration-id") UUID registrationId) {
         Registration registration = registrationService.decline(registrationId);
         return registrationMapper.toRegistrationDto(registration);
+    }
+
+    @GetMapping("/{id}/created-at")
+    public CreateAtRegistrationDto getCreatedAt(@PathVariable("id") UUID id) {
+        Registration registration = registrationService.getRegistrationById(id);
+        return createdAtMapper.toCreateAtRegistrationDto(registration);
     }
 }
