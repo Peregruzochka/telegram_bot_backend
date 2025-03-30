@@ -11,6 +11,7 @@ import ru.peregruzochka.telegram_bot_backend.model.Lesson;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
 import ru.peregruzochka.telegram_bot_backend.model.User;
+import ru.peregruzochka.telegram_bot_backend.model.UserStatus;
 import ru.peregruzochka.telegram_bot_backend.redis.ConfirmRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.redis.LocalCancelPublisher;
 import ru.peregruzochka.telegram_bot_backend.redis.NewRegistrationEventPublisher;
@@ -35,6 +36,7 @@ import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.FIRST_QU
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.NOT_CONFIRMED;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.SECOND_QUESTION;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.USER_CANCELLED;
+import static ru.peregruzochka.telegram_bot_backend.model.UserStatus.NEW;
 
 
 @Slf4j
@@ -78,6 +80,8 @@ public class RegistrationService {
             User newUser = registration.getUser();
             newUser.setChildren(List.of(newChild));
             newChild.setParent(newUser);
+            //потом убрать
+            newUser.setStatus(NEW);
             userRepository.save(newUser);
 
         } else if (registration.getType().equals(REGULAR_USER)) {
