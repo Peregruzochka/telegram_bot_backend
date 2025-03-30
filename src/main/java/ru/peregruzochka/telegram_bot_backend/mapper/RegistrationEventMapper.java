@@ -16,9 +16,9 @@ public class RegistrationEventMapper {
                 .childrenBirthday(registration.getChild().getBirthday())
                 .teacherName(registration.getTimeslot().getTeacher().getName())
                 .lessonName(registration.getLesson().getName())
-                .registrationType(registration.getType().toString())
                 .startTime(registration.getTimeslot().getStartTime())
                 .endTime(registration.getTimeslot().getEndTime())
+                .registrationType(registration.getUser().getStatus().toString())
                 .build();
     }
 
@@ -31,7 +31,6 @@ public class RegistrationEventMapper {
                 .childrenBirthday(registration.getChild().getBirthday())
                 .teacherName(timeSlot.getTeacher().getName())
                 .lessonName(registration.getLesson().getName())
-                .registrationType(registration.getType().toString())
                 .startTime(timeSlot.getStartTime())
                 .endTime(timeSlot.getEndTime())
                 .build();

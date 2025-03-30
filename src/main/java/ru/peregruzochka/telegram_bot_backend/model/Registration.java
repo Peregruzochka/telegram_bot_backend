@@ -17,7 +17,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
-import ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.RegistrationType;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -55,10 +54,6 @@ public class Registration {
     @Column(name = "confirm_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private ConfirmStatus confirmStatus;
-
-    @Column(name = "registration_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private RegistrationType type;
 
     @Column(name = "created_at", nullable = false)
     @CreationTimestamp

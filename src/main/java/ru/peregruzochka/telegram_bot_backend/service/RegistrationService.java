@@ -7,8 +7,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.peregruzochka.telegram_bot_backend.dto.LocalCancelEvent;
 import ru.peregruzochka.telegram_bot_backend.model.Child;
+import ru.peregruzochka.telegram_bot_backend.model.ChildStatus;
+import ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus;
 import ru.peregruzochka.telegram_bot_backend.model.Lesson;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
+import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
 import ru.peregruzochka.telegram_bot_backend.model.User;
 import ru.peregruzochka.telegram_bot_backend.model.UserStatus;
@@ -18,6 +21,7 @@ import ru.peregruzochka.telegram_bot_backend.redis.NewRegistrationEventPublisher
 import ru.peregruzochka.telegram_bot_backend.repository.ChildRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.LessonRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.RegistrationRepository;
+import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.UserRepository;
 
@@ -26,8 +30,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.RegistrationType.NEW_USER;
-import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.RegistrationType.REGULAR_USER;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.AUTO_CANCELLED;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.AUTO_CONFIRMED;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.AUTO_CONFIRMED_QR;
@@ -36,7 +38,6 @@ import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.FIRST_QU
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.NOT_CONFIRMED;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.SECOND_QUESTION;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.USER_CANCELLED;
-import static ru.peregruzochka.telegram_bot_backend.model.UserStatus.NEW;
 
 
 @Slf4j
@@ -51,6 +52,7 @@ public class RegistrationService {
     private final NewRegistrationEventPublisher newRegistrationEventPublisher;
     private final ConfirmRegistrationEventPublisher confirmRegistrationEventPublisher;
     private final LocalCancelPublisher localCancelPublisher;
+    private final TeacherRepository teacherRepository;
 
     @Value("${approve-delay.first-approve}")
     private int firstApproveDelay;
@@ -64,74 +66,93 @@ public class RegistrationService {
 
     @Transactional
     public Registration addRegistration(Registration registration) {
-        TimeSlot registrationTimeSlot = registration.getTimeslot();
-        TimeSlot savedTimeSlot = timeSlotRepository.findById(registrationTimeSlot.getId())
-                .orElseThrow(() -> new IllegalArgumentException("TimeSlot does not exist"));
+        checkLesson(registration.getLesson());
+        checkTimeSlot(registration.getTimeslot());
 
-        if (savedTimeSlot.getIsAvailable()) {
-            savedTimeSlot.setIsAvailable(false);
-            registration.setTimeslot(savedTimeSlot);
-        } else {
-            throw new IllegalArgumentException("TimeSlot is not available");
+        UUID teacherId = registration.getTimeslot().getTeacher().getId();
+        Teacher dbTeacher = teacherRepository.findById(teacherId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found: " + teacherId)
+        );
+
+        registration.getTimeslot().setIsAvailable(false);
+        registration.getTimeslot().setTeacher(dbTeacher);
+
+        User user = registration.getUser();
+        switch (user.getStatus()) {
+            case NEW -> userRepository.save(user);
+            case REGULAR -> checkUser(user);
+            case EDITING -> {
+                checkUser(user);
+                User editingUser = userRepository.findById(user.getId()).orElseThrow();
+                editingUser.setUserName(user.getUserName());
+                editingUser.setStatus(UserStatus.REGULAR);
+                userRepository.save(editingUser);
+            }
         }
 
-        if (registration.getType().equals(NEW_USER)) {
-            Child newChild = registration.getChild();
-            User newUser = registration.getUser();
-            newUser.setChildren(List.of(newChild));
-            newChild.setParent(newUser);
-            //потом убрать
-            newUser.setStatus(NEW);
-            userRepository.save(newUser);
-
-        } else if (registration.getType().equals(REGULAR_USER)) {
-            Long telegramId = registration.getUser().getTelegramId();
-            User regularUser = userRepository.findByTelegramId(telegramId)
-                    .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-            if (!regularUser.equals(registration.getUser())) {
-                regularUser.setUserName(registration.getUser().getUserName());
-                regularUser.setPhone(registration.getUser().getPhone());
-            }
-
-            Child registrationChild = registration.getChild();
-
-            if (registrationChild.getId() == null) {
-                registrationChild.setParent(regularUser);
-                childRepository.save(registrationChild);
-            } else {
-                UUID childId = registrationChild.getId();
-                Child existChild = childRepository.findById(childId)
-                        .orElseThrow(() -> new IllegalArgumentException("Child not found"));
-                if (!existChild.equals(registrationChild)) {
-                    existChild.setChildName(registrationChild.getChildName());
-                    existChild.setBirthday(registrationChild.getBirthday());
-                    childRepository.save(existChild);
+        Child child = registration.getChild();
+        switch (child.getStatus()) {
+            case NEW -> {
+                child.setParent(user);
+                childRepository.save(child);
+                if (user.getChildren() == null) {
+                    user.setChildren(List.of(child));
+                } else {
+                    user.getChildren().add(child);
                 }
             }
-
-            userRepository.save(regularUser);
-            registration.setUser(regularUser);
+            case REGULAR -> checkChild(child);
+            case EDITING -> {
+                checkChild(child);
+                Child editingChild = childRepository.findById(child.getId()).orElseThrow();
+                editingChild.setChildName(child.getChildName());
+                editingChild.setBirthday(child.getBirthday());
+                editingChild.setStatus(ChildStatus.REGULAR);
+                childRepository.save(editingChild);
+            }
         }
 
-        Lesson registrationLesson = registration.getLesson();
-        Lesson savedLesson = lessonRepository.findById(registrationLesson.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Lesson does not exist"));
-        registration.setLesson(savedLesson);
-
-        registration.setConfirmStatus(NOT_CONFIRMED);
-
-        if (LocalDateTime.now().plusDays(1).isAfter(registration.getTimeslot().getStartTime())) {
-            registration.setConfirmStatus(AUTO_CONFIRMED);
-        }
+        ConfirmStatus status = chooseConfirmStatus(registration);
+        registration.setConfirmStatus(status);
 
         registration.setCreatedAt(LocalDateTime.now());
+        Registration newRegistration = registrationRepository.save(registration);
+        newRegistrationEventPublisher.publish(newRegistration);
+        log.info("New registration: {}", newRegistration);
+        return newRegistration;
+    }
 
-        Registration savedRegistration = registrationRepository.save(registration);
+    private ConfirmStatus chooseConfirmStatus(Registration registration) {
+        LocalDateTime startTime = registration.getTimeslot().getStartTime();
+        if (LocalDateTime.now().plusDays(1).isAfter(startTime)) {
+            return AUTO_CONFIRMED;
+        } else  {
+            return NOT_CONFIRMED;
+        }
+    }
 
-        log.info("Registration added: {}", savedRegistration);
-        newRegistrationEventPublisher.publish(savedRegistration);
-        return savedRegistration;
+    private void checkChild(Child child) {
+        childRepository.findById(child.getId()).orElseThrow(
+                () -> new IllegalArgumentException("Child not found: " + child.getId())
+        );
+    }
+
+    private void checkUser(User user) {
+        userRepository.findById(user.getId()).orElseThrow(
+                () -> new IllegalStateException("User with id " + user.getId() + " not found")
+        );
+    }
+
+    private void checkLesson(Lesson lesson) {
+        lessonRepository.findById(lesson.getId()).orElseThrow(
+                () -> new IllegalArgumentException("Lesson not found: " + lesson.getId())
+        );
+    }
+
+    private void checkTimeSlot(TimeSlot timeSlot) {
+        timeSlotRepository.findById(timeSlot.getId()).orElseThrow(
+                () -> new IllegalArgumentException("TimeSlot not found: " + timeSlot.getId())
+        );
     }
 
     @Transactional(readOnly = true)

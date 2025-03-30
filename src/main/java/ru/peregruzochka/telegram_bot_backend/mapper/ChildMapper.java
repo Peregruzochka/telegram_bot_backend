@@ -14,6 +14,7 @@ public class ChildMapper {
                 .id(child.getId())
                 .name(child.getChildName())
                 .birthday(child.getBirthday())
+                .status(child.getStatus())
                 .build();
     }
 
@@ -22,6 +23,7 @@ public class ChildMapper {
                 .id(childDto.getId())
                 .childName(childDto.getName())
                 .birthday(childDto.getBirthday())
+                .status(childDto.getStatus())
                 .build();
     }
 

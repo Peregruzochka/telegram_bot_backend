@@ -16,7 +16,10 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
     @Query("""
         select r from Registration r
         where r.user = ?1
-        and r.type != 'CANCEL'
+        and not exists (
+            select 1 from Cancel c
+            where c.registration = r
+        )
         and r.timeslot.startTime > CURRENT_TIMESTAMP
         order by r.timeslot.startTime
         """)
