@@ -24,20 +24,17 @@ public class RegistrationMapper {
                 .user(userMapper.toUserEntity(registrationDto.getUser()))
                 .lesson(lessonMapper.toLessonEntity(registrationDto.getLesson()))
                 .timeslot(timeSlotMapper.toTimeSlotEntity(registrationDto.getSlot()))
-                .type(registrationDto.getType())
                 .build();
     }
 
     public RegistrationDto toRegistrationDto(Registration registration) {
         return RegistrationDto.builder()
                 .id(registration.getId())
-                .telegramId(registration.getUser().getTelegramId())
                 .child(childMapper.toChildDto(registration.getChild()))
                 .user(userMapper.toUserDto(registration.getUser()))
                 .lesson(lessonMapper.toLessonDto(registration.getLesson()))
                 .teacher(teacherMapper.toTeacherDto(registration.getTimeslot().getTeacher()))
                 .slot(timeSlotMapper.toTimeSlotDto(registration.getTimeslot()))
-                .type(registration.getType())
                 .build();
     }
 

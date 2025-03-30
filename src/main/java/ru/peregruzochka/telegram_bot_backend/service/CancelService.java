@@ -14,8 +14,6 @@ import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotRepository;
 
 import java.util.UUID;
 
-import static ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto.RegistrationType.CANCEL;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -33,15 +31,11 @@ public class CancelService {
         Registration registration = registrationRepository.findById(registrationId)
                 .orElseThrow(() -> new IllegalArgumentException("Registration not found"));
 
-        if (registration.getType().equals(CANCEL)) {
-            throw new IllegalArgumentException("Can't cancel registration");
-        }
 
         TimeSlot timeSlot = registration.getTimeslot();
         timeSlot.setIsAvailable(true);
         timeSlotRepository.save(timeSlot);
 
-        registration.setType(CANCEL);
         registration.setTimeslot(null);
         registrationRepository.save(registration);
 

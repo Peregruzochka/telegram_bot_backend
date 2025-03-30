@@ -17,7 +17,6 @@ import java.util.UUID;
 @ToString
 public class RegistrationDto {
     private UUID id;
-    private Long telegramId;
     private UserDto user;
     private ChildDto child;
     private LessonDto lesson;

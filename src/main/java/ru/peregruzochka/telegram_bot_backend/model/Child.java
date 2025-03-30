@@ -2,6 +2,8 @@ package ru.peregruzochka.telegram_bot_backend.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,6 +38,10 @@ public class Child {
 
     @Column(nullable = false, length = 32)
     private String birthday;
+
+    @Column(name = "status", nullable = false, length = 16)
+    @Enumerated(EnumType.STRING)
+    private ChildStatus status;
 
     @ManyToOne
     @JoinColumn(name = "parent_id", nullable = false)
