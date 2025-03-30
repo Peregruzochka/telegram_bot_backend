@@ -46,4 +46,8 @@ public class Teacher {
     @ToString.Exclude
     @ManyToMany(mappedBy = "teachers")
     private List<Lesson> lessons;
+
+    @ToString.Exclude
+    @ManyToMany(mappedBy = "teachers")
+    private List<GroupLesson> groupLessons;
 }
