@@ -73,6 +73,12 @@ public class RegistrationController {
         return registrationMapper.toRegistrationDto(registration);
     }
 
+    @GetMapping("/{id}")
+    public RegistrationDto getRegistration(@PathVariable("id") UUID id) {
+        Registration registration = registrationService.getRegistrationById(id);
+        return registrationMapper.toRegistrationDto(registration);
+    }
+
     @GetMapping("/{id}/created-at")
     public CreateAtRegistrationDto getCreatedAt(@PathVariable("id") UUID id) {
         Registration registration = registrationService.getRegistrationById(id);

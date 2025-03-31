@@ -33,6 +33,7 @@ public class RegistrationEventMapper {
                 .lessonName(registration.getLesson().getName())
                 .startTime(timeSlot.getStartTime())
                 .endTime(timeSlot.getEndTime())
+                .registrationType(registration.getUser().getStatus().toString())
                 .build();
     }
 }
