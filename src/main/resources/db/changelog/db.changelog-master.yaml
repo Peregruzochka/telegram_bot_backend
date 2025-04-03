@@ -29,4 +29,7 @@ databaseChangeLog:
       file: db/changelog/changeset/v014_child_status.sql
   - include:
       file: db/changelog/changeset/v015_drop_registration_type.sql
+  - include:
+      file: db/changelog/changeset/v016_group_init.sql
+
 
