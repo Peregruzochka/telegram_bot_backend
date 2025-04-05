@@ -46,10 +46,6 @@ public class GroupRegistration {
     @JoinColumn(name = "group_timeslot_id")
     private GroupTimeSlot groupTimeslot;
 
-    @Column(name = "registration_type", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private RegistrationDto.RegistrationType registrationType;
-
     @Column(name = "confirm_status", nullable = false)
     @Enumerated(EnumType.STRING)
     private ConfirmStatus confirmStatus;

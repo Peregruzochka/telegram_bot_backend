@@ -5,21 +5,17 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.util.UUID;
 
-@Builder
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
-public class RegistrationDto {
+public class GroupRegistrationDto {
     private UUID id;
-    private UserDto user;
     private ChildDto child;
-    private LessonDto lesson;
-    private TeacherDto teacher;
-    private TimeSlotDto slot;
+    private UserDto user;
+    private GroupTimeSlotDto timeSlot;
 }

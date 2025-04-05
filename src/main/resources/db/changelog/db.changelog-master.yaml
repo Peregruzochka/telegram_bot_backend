@@ -33,3 +33,5 @@ databaseChangeLog:
       file: db/changelog/changeset/v016_group_init.sql
   - include:
       file: db/changelog/changeset/v017_group_lessons_teachers.sql
+  - include:
+      file: db/changelog/changeset/v018_group_registrations_drop_type.sql

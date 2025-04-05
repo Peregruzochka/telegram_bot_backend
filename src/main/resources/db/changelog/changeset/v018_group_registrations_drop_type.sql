@@ -1,0 +1,2 @@
+ALTER TABLE group_registrations
+DROP COLUMN registration_type;

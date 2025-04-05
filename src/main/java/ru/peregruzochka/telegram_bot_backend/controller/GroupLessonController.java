@@ -32,7 +32,7 @@ public class GroupLessonController {
 
     @PutMapping("/{group-lesson-id}/add-teacher")
     public GroupLessonDto addLessonToTeacher(@PathVariable(name = "group-lesson-id") UUID lessonId,
-                                        @RequestParam(name = "teacher-id") UUID teacherId) {
+                                             @RequestParam(name = "teacher-id") UUID teacherId) {
         GroupLesson groupLesson = groupLessonService.addLessonToTeacher(lessonId, teacherId);
         return groupLessonMapper.mapToGroupLessonDto(groupLesson);
     }

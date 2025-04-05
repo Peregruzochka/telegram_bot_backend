@@ -4,8 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlot;
 import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
+import ru.peregruzochka.telegram_bot_backend.repository.GroupTimeSlotRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotRepository;
 
@@ -21,6 +23,7 @@ import java.util.UUID;
 public class TimeSlotService {
     private final TimeSlotRepository timeSlotRepository;
     private final TeacherRepository teacherRepository;
+    private final GroupTimeSlotRepository groupTimeSlotRepository;
 
     @Transactional(readOnly = true)
     public List<TimeSlot> getTeacherTimeSlotsInNextMonth(UUID teacherId) {
@@ -85,10 +88,8 @@ public class TimeSlotService {
                 () -> new IllegalArgumentException("Teacher not found")
         );
 
-        List<TimeSlot> overlapping = timeSlotRepository.findOverlappingTimeSlots(teacher, startTime, endTime);
-        if (!overlapping.isEmpty()) {
-            throw new IllegalArgumentException("Overlapping times slots");
-        }
+
+        checkOverlapping(teacher, startTime, endTime);
 
         TimeSlot timeSlot = TimeSlot.builder()
                 .teacher(teacher)
@@ -115,6 +116,18 @@ public class TimeSlotService {
         );
         log.info("Get time slot {}", timeSlot);
         return timeSlot;
+    }
+
+    private void checkOverlapping(Teacher teacher, LocalDateTime start, LocalDateTime end) {
+        List<TimeSlot> individualOverlapping = timeSlotRepository.findOverlappingTimeSlots(teacher, start, end);
+        if (!individualOverlapping.isEmpty()) {
+            throw new IllegalArgumentException("Overlapping times slots");
+        }
+
+        List<GroupTimeSlot> groupOverlapping = groupTimeSlotRepository.findOverlappingTimeSlots(teacher, start, end);
+        if (!groupOverlapping.isEmpty()) {
+            throw new IllegalArgumentException("Overlapping times slots");
+        }
     }
 
 
