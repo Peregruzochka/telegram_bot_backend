@@ -1,6 +1,7 @@
 package ru.peregruzochka.telegram_bot_backend.controller;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -13,6 +14,7 @@ import ru.peregruzochka.telegram_bot_backend.mapper.GroupLessonMapper;
 import ru.peregruzochka.telegram_bot_backend.model.GroupLesson;
 import ru.peregruzochka.telegram_bot_backend.service.GroupLessonService;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -36,4 +38,11 @@ public class GroupLessonController {
         GroupLesson groupLesson = groupLessonService.addLessonToTeacher(lessonId, teacherId);
         return groupLessonMapper.mapToGroupLessonDto(groupLesson);
     }
+
+    @GetMapping("/by-teacher")
+    public List<GroupLessonDto> getGroupLessonsByTeacher(@RequestParam(name = "teacher-id") UUID teacherId) {
+        List<GroupLesson> groupLessons = groupLessonService.getGroupLessonsByTeacher(teacherId);
+        return groupLessonMapper.mapToGroupLessonDtoList(groupLessons);
+    }
+
 }

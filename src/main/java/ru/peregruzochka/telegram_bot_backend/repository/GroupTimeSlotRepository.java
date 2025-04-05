@@ -20,4 +20,5 @@ public interface GroupTimeSlotRepository extends JpaRepository<GroupTimeSlot, UU
         """)
     List<GroupTimeSlot> findOverlappingTimeSlots(Teacher teacher, LocalDateTime from, LocalDateTime to);
 
+    List<GroupTimeSlot> getGroupTimeSlotByTeacherAndStartTimeBetween(Teacher teacher, LocalDateTime start, LocalDateTime end);
 }

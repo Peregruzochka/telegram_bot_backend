@@ -42,4 +42,9 @@ public class TeacherController {
         return teacherMapper.toTeacherDtoList(teachers);
     }
 
+    @GetMapping("/group-teachers")
+    public List<TeacherDto> getGroupTeacher() {
+        List<Teacher> teachers = teacherService.getGroupTeachers();
+        return teacherMapper.toTeacherDtoList(teachers);
+    }
 }

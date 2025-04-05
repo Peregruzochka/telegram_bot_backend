@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 import ru.peregruzochka.telegram_bot_backend.dto.GroupTimeSlotDto;
 import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlot;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class GroupTimeSlotMapper {
@@ -37,5 +39,15 @@ public class GroupTimeSlotMapper {
                 .endTime(groupTimeSlotDto.getEndTime())
                 .teacher(teacherMapper.toTeacherEntity(groupTimeSlotDto.getTeacher()))
                 .build();
+    }
+
+    public List<GroupTimeSlotDto> toGroupTimeSlotDtoList(List<GroupTimeSlot> groupTimeSlots) {
+        if (groupTimeSlots == null) {
+            return null;
+        } else {
+            return groupTimeSlots.stream()
+                    .map(this::toGroupTimeSlotDto)
+                    .toList();
+        }
     }
 }

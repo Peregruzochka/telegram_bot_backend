@@ -13,6 +13,7 @@ import ru.peregruzochka.telegram_bot_backend.repository.GroupTimeSlotRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -47,6 +48,16 @@ public class GroupTimeSlotService {
         GroupTimeSlot savedGroupTimeSlot = groupTimeSlotRepository.save(groupTimeSlot);
         log.info("Added group time slot: {}", savedGroupTimeSlot);
         return savedGroupTimeSlot;
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupTimeSlot> getTeacherGroupTimeSlotsByDate(UUID teacherId, LocalDate date) {
+        Teacher teacher = getTeacherFromDB(teacherId);
+        LocalDateTime startTime = date.atStartOfDay();
+        LocalDateTime endTime = startTime.plusDays(1);
+        List<GroupTimeSlot> groupTimeSlots = groupTimeSlotRepository.getGroupTimeSlotByTeacherAndStartTimeBetween(teacher, startTime, endTime);
+        log.info("Find teacher group time slots by date: {}", groupTimeSlots.size());
+        return groupTimeSlots;
     }
 
     private void checkTeachersLesson(GroupLesson lesson, Teacher teacher) {
@@ -84,4 +95,6 @@ public class GroupTimeSlotService {
                 () -> new IllegalArgumentException("Teacher not found")
         );
     }
+
+
 }

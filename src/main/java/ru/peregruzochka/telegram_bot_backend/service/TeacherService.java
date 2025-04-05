@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.peregruzochka.telegram_bot_backend.model.GroupLesson;
 import ru.peregruzochka.telegram_bot_backend.model.Image;
 import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.repository.ImageRepository;
@@ -35,6 +36,13 @@ public class TeacherService {
     public List<Teacher> getAllTeachers() {
         List<Teacher> teachers = teacherRepository.findAll();
         log.info("Teachers found: {}", teachers.size());
+        return teachers;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Teacher> getGroupTeachers() {
+        List<Teacher> teachers = teacherRepository.findTeachersByAllGroupLessons();
+        log.info("Teachers with group lessons found: {}", teachers.size());
         return teachers;
     }
 }

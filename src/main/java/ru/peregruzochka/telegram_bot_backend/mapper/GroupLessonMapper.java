@@ -5,6 +5,9 @@ import org.springframework.stereotype.Component;
 import ru.peregruzochka.telegram_bot_backend.dto.GroupLessonDto;
 import ru.peregruzochka.telegram_bot_backend.model.GroupLesson;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class GroupLessonMapper {
@@ -28,5 +31,15 @@ public class GroupLessonMapper {
                 .description(groupLesson.getDescription())
                 .teachers(teacherMapper.toTeacherDtoList(groupLesson.getTeachers()))
                 .build();
+    }
+
+    public List<GroupLessonDto> mapToGroupLessonDtoList(List<GroupLesson> groupLessons) {
+        if (groupLessons == null || groupLessons.isEmpty()) {
+            return null;
+        } else {
+            return groupLessons.stream()
+                    .map(this::mapToGroupLessonDto)
+                    .toList();
+        }
     }
 }

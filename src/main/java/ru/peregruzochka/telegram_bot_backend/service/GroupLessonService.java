@@ -49,4 +49,15 @@ public class GroupLessonService {
         log.info("Add teacher to group lesson: {}", savedGroupLesson);
         return savedGroupLesson;
     }
+
+    @Transactional(readOnly = true)
+    public List<GroupLesson> getGroupLessonsByTeacher(UUID teacherId) {
+        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found")
+        );
+
+        List<GroupLesson> groupLessons = groupLessonRepository.findAllByTeacher(teacher);
+        log.info("Get group lessons by teacher: {}", groupLessons.size());
+        return groupLessons;
+    }
 }
