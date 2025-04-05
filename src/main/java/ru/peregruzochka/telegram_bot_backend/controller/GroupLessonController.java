@@ -45,4 +45,16 @@ public class GroupLessonController {
         return groupLessonMapper.mapToGroupLessonDtoList(groupLessons);
     }
 
+    @GetMapping("/all")
+    public List<GroupLessonDto> getAllGroupLessons() {
+        List<GroupLesson> lessons = groupLessonService.getAllGroupLessons();
+        return groupLessonMapper.mapToGroupLessonDtoList(lessons);
+    }
+
+    @GetMapping("/{lesson-id}")
+    public GroupLessonDto getGroupLesson(@PathVariable(name = "lesson-id") UUID lessonId) {
+        GroupLesson lesson = groupLessonService.getGroupLesson(lessonId);
+        return groupLessonMapper.mapToGroupLessonDto(lesson);
+    }
+
 }

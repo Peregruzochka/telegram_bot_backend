@@ -60,4 +60,20 @@ public class GroupLessonService {
         log.info("Get group lessons by teacher: {}", groupLessons.size());
         return groupLessons;
     }
+
+    @Transactional(readOnly = true)
+    public List<GroupLesson> getAllGroupLessons() {
+        List<GroupLesson> groupLessons = groupLessonRepository.findAll();
+        log.info("Get group lessons: {}", groupLessons.size());
+        return groupLessons;
+    }
+
+    @Transactional(readOnly = true)
+    public GroupLesson getGroupLesson(UUID lessonId) {
+        GroupLesson lesson = groupLessonRepository.findById(lessonId).orElseThrow(
+                () -> new IllegalArgumentException("Lesson not found")
+        );
+        log.info("Get group lesson: {}", lesson);
+        return lesson;
+    }
 }
