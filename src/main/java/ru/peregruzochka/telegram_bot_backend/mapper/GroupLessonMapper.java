@@ -5,7 +5,6 @@ import org.springframework.stereotype.Component;
 import ru.peregruzochka.telegram_bot_backend.dto.GroupLessonDto;
 import ru.peregruzochka.telegram_bot_backend.model.GroupLesson;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Component

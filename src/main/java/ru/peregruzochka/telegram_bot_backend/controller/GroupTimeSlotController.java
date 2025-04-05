@@ -1,8 +1,9 @@
 package ru.peregruzochka.telegram_bot_backend.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,4 +41,14 @@ public class GroupTimeSlotController {
         return groupTimeSlotMapper.toGroupTimeSlotDtoList(groupTimeSlots);
     }
 
+    @GetMapping("/next-month-search")
+    public List<GroupTimeSlotDto> getTeacherGroupTimeSlotInNextMonth(@RequestParam("teacher-id") UUID teacherId) {
+        List<GroupTimeSlot> groupTimeSlots = groupTimeSlotService.getTeacherGroupTimeSlotsInNextMonth(teacherId);
+        return groupTimeSlotMapper.toGroupTimeSlotDtoList(groupTimeSlots);
+    }
+
+    @DeleteMapping("/{group-timeslot-id}")
+    public void deleteGroupTimeSlot(@PathVariable("group-timeslot-id") UUID groupTimeslotId) {
+        groupTimeSlotService.delete(groupTimeslotId);
+    }
 }

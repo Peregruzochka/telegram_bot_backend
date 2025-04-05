@@ -55,9 +55,35 @@ public class GroupTimeSlotService {
         Teacher teacher = getTeacherFromDB(teacherId);
         LocalDateTime startTime = date.atStartOfDay();
         LocalDateTime endTime = startTime.plusDays(1);
-        List<GroupTimeSlot> groupTimeSlots = groupTimeSlotRepository.getGroupTimeSlotByTeacherAndStartTimeBetween(teacher, startTime, endTime);
+        List<GroupTimeSlot> groupTimeSlots =
+                groupTimeSlotRepository.getGroupTimeSlotByTeacherAndStartTimeBetween(teacher, startTime, endTime);
         log.info("Find teacher group time slots by date: {}", groupTimeSlots.size());
         return groupTimeSlots;
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupTimeSlot> getTeacherGroupTimeSlotsInNextMonth(UUID teacherId) {
+        Teacher teacher = getTeacherFromDB(teacherId);
+        LocalDateTime startTime = LocalDateTime.now();
+        LocalDateTime endTime = startTime.plusMonths(1);
+        List<GroupTimeSlot> groupTimeSlots =
+                groupTimeSlotRepository.getGroupTimeSlotByTeacherAndStartTimeBetween(teacher, startTime, endTime);
+        log.info("Find teacher group time slots in next month: {}", groupTimeSlots.size());
+        return groupTimeSlots;
+    }
+
+    @Transactional
+    public void delete(UUID groupTimeslotId) {
+        GroupTimeSlot groupTimeSlot = groupTimeSlotRepository.findById(groupTimeslotId).orElseThrow(
+                () -> new IllegalArgumentException("GroupTimeSlot not found")
+        );
+
+        if (!groupTimeSlot.getRegistrations().isEmpty()) {
+            throw new IllegalArgumentException("GroupTimeSlot already has registrations");
+        }
+
+        groupTimeSlotRepository.delete(groupTimeSlot);
+        log.info("Deleted group time slot: {}", groupTimeSlot);
     }
 
     private void checkTeachersLesson(GroupLesson lesson, Teacher teacher) {
