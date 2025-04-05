@@ -49,7 +49,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 
-    @ToString.Exclude
+//    @ToString.Exclude
     @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
     private List<Child> children;

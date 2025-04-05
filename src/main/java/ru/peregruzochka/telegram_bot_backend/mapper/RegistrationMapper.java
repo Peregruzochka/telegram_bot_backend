@@ -3,7 +3,9 @@ package ru.peregruzochka.telegram_bot_backend.mapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import ru.peregruzochka.telegram_bot_backend.dto.RegistrationDto;
+import ru.peregruzochka.telegram_bot_backend.dto.TeacherDto;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
+import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,7 +35,7 @@ public class RegistrationMapper {
                 .child(childMapper.toChildDto(registration.getChild()))
                 .user(userMapper.toUserDto(registration.getUser()))
                 .lesson(lessonMapper.toLessonDto(registration.getLesson()))
-                .teacher(teacherMapper.toTeacherDto(registration.getTimeslot().getTeacher()))
+                .teacher(getTeacher(registration.getTimeslot()))
                 .slot(timeSlotMapper.toTimeSlotDto(registration.getTimeslot()))
                 .build();
     }
@@ -42,5 +44,13 @@ public class RegistrationMapper {
         return registrations.stream()
                 .map(this::toRegistrationDto)
                 .collect(Collectors.toList());
+    }
+
+    private TeacherDto getTeacher(TimeSlot timeSlot) {
+        if (timeSlot != null && timeSlot.getTeacher() != null) {
+            return teacherMapper.toTeacherDto(timeSlot.getTeacher());
+        } else {
+            return null;
+        }
     }
 }

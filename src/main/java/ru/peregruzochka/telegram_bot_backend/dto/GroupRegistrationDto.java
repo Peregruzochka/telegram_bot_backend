@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -18,4 +19,5 @@ public class GroupRegistrationDto {
     private ChildDto child;
     private UserDto user;
     private GroupTimeSlotDto timeSlot;
+    private LocalDateTime createdAt;
 }

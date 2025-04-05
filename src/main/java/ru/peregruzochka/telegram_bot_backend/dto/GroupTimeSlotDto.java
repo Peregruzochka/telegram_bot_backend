@@ -5,11 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.peregruzochka.telegram_bot_backend.model.GroupLesson;
-import ru.peregruzochka.telegram_bot_backend.model.GroupRegistration;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.UUID;
 
 @Getter

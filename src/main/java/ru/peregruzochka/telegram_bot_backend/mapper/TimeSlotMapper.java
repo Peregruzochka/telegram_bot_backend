@@ -14,6 +14,9 @@ public class TimeSlotMapper {
     private final TeacherMapper teacherMapper;
 
     public TimeSlotDto toTimeSlotDto(TimeSlot timeSlot) {
+        if (timeSlot == null) {
+            return null;
+        }
         return TimeSlotDto.builder()
                 .id(timeSlot.getId())
                 .startTime(timeSlot.getStartTime())
