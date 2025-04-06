@@ -26,7 +26,7 @@ public class TimeSlotService {
     private final GroupTimeSlotRepository groupTimeSlotRepository;
 
     @Transactional(readOnly = true)
-    public List<TimeSlot> getTeacherTimeSlotsInNextMonth(UUID teacherId) {
+    public List<TimeSlot> getTeacherAvailableTimeSlotsInNextMonth(UUID teacherId) {
         Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
                 () -> new IllegalArgumentException("Teacher not found")
         );
@@ -34,7 +34,7 @@ public class TimeSlotService {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime plusMonth = now.plusMonths(1);
         List<TimeSlot> timeSlots = timeSlotRepository.getTeacherAvailableTimeSlots(teacher, now, plusMonth);
-        log.info("Get available time slot list ({}) for teacher {}", timeSlots.size(), teacher);
+        log.info("Get available time slot list in next month ({}) for teacher {}", timeSlots.size(), teacher);
         return timeSlots;
     }
 
@@ -58,7 +58,7 @@ public class TimeSlotService {
         LocalDateTime from = date.atStartOfDay();
         LocalDateTime to = from.plusDays(1);
         List<TimeSlot> timeSlots = timeSlotRepository.getTeacherAvailableTimeSlots(teacher, from, to);
-        log.info("Get available time slot list ({}) for teacher {}", timeSlots.size(), teacher);
+        log.info("Get available time slot list  ({}) by date [{}] for teacher {}", timeSlots.size(), date, teacher);
         return timeSlots;
     }
 

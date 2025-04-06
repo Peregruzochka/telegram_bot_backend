@@ -41,10 +41,36 @@ public class GroupTimeSlotController {
         return groupTimeSlotMapper.toGroupTimeSlotDtoList(groupTimeSlots);
     }
 
+    @GetMapping("/available-by-date")
+    public List<GroupTimeSlotDto> getAvailableGroupTimeSlotsByDate(@RequestParam("teacher-id") UUID teacherId,
+                                                                   @RequestParam("date") LocalDate date) {
+        List<GroupTimeSlot> groupTimeSlots = groupTimeSlotService.getTeacherAvailableGroupTimeSlotsByDate(teacherId, date);
+        return groupTimeSlotMapper.toGroupTimeSlotDtoList(groupTimeSlots);
+    }
+
     @GetMapping("/next-month-search")
     public List<GroupTimeSlotDto> getTeacherGroupTimeSlotInNextMonth(@RequestParam("teacher-id") UUID teacherId) {
         List<GroupTimeSlot> groupTimeSlots = groupTimeSlotService.getTeacherGroupTimeSlotsInNextMonth(teacherId);
         return groupTimeSlotMapper.toGroupTimeSlotDtoList(groupTimeSlots);
+    }
+
+    @GetMapping("/available-next-month-search")
+    public List<GroupTimeSlotDto> getTeacherAvailableGroupTimeSlotInNextMonth(@RequestParam("teacher-id") UUID teacherId) {
+        List<GroupTimeSlot> groupTimeSlots = groupTimeSlotService.getTeacherAvailableGroupTimeSlotsInNextMonth(teacherId);
+        return groupTimeSlotMapper.toGroupTimeSlotDtoList(groupTimeSlots);
+    }
+
+    @GetMapping("/by-user-by-date")
+    public List<GroupTimeSlotDto> getUserGroupTimeSlotsByDate(@RequestParam("user-id") UUID userId,
+                                                              @RequestParam("date") LocalDate date) {
+        List<GroupTimeSlot> groupTimeSlots = groupTimeSlotService.getUserGroupTimeSlotsByDay(userId, date);
+        return groupTimeSlotMapper.toGroupTimeSlotDtoList(groupTimeSlots);
+    }
+
+    @GetMapping("/{group-timeslot-id}")
+    public GroupTimeSlotDto getGroupTimeSlot(@PathVariable("group-timeslot-id") UUID groupTimeslotId) {
+        GroupTimeSlot timeSlot = groupTimeSlotService.getGroupTimeSlotById(groupTimeslotId);
+        return groupTimeSlotMapper.toGroupTimeSlotDto(timeSlot);
     }
 
     @DeleteMapping("/{group-timeslot-id}")

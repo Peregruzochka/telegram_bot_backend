@@ -47,6 +47,7 @@ public class GroupTimeSlot {
     @JoinColumn(name = "group_lesson_id", nullable = false)
     private GroupLesson groupLesson;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "groupTimeslot")
     private List<GroupRegistration> registrations;
 }

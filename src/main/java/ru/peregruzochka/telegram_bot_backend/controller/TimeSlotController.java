@@ -25,9 +25,9 @@ public class TimeSlotController {
     private final TimeSlotMapper timeSlotMapper;
     private final TimeSlotService timeSlotService;
 
-    @GetMapping("/next-month-search")
+    @GetMapping("/available-next-month-search")
     public List<TimeSlotDto> getTeacherTimeSlotsInNextMonth(@RequestParam("teacher-id") UUID teacherId) {
-        List<TimeSlot> timeSlots = timeSlotService.getTeacherTimeSlotsInNextMonth(teacherId);
+        List<TimeSlot> timeSlots = timeSlotService.getTeacherAvailableTimeSlotsInNextMonth(teacherId);
         return timeSlotMapper.toTimeSlotDtoList(timeSlots);
     }
 

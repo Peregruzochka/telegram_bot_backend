@@ -8,13 +8,16 @@ import ru.peregruzochka.telegram_bot_backend.model.GroupLesson;
 import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlot;
 import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
+import ru.peregruzochka.telegram_bot_backend.model.User;
 import ru.peregruzochka.telegram_bot_backend.repository.GroupLessonRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.GroupTimeSlotRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotRepository;
+import ru.peregruzochka.telegram_bot_backend.repository.UserRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +29,7 @@ public class GroupTimeSlotService {
     private final TeacherRepository teacherRepository;
     private final GroupLessonRepository groupLessonRepository;
     private final TimeSlotRepository timeSlotRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public GroupTimeSlot addGroupTimeSlot(UUID teacherId, UUID lessonId, LocalDateTime start) {
@@ -72,6 +76,16 @@ public class GroupTimeSlotService {
         return groupTimeSlots;
     }
 
+    @Transactional(readOnly = true)
+    public List<GroupTimeSlot> getTeacherAvailableGroupTimeSlotsInNextMonth(UUID teacherId) {
+        Teacher teacher = getTeacherFromDB(teacherId);
+        LocalDateTime startTime = LocalDateTime.now();
+        LocalDateTime endTime = startTime.plusMonths(1);
+        List<GroupTimeSlot> groupTimeSlots = groupTimeSlotRepository.getAvailableByTeacher(teacher, startTime, endTime);
+        log.info("Find teacher available group time slots: {}", groupTimeSlots.size());
+        return groupTimeSlots;
+    }
+
     @Transactional
     public void delete(UUID groupTimeslotId) {
         GroupTimeSlot groupTimeSlot = groupTimeSlotRepository.findById(groupTimeslotId).orElseThrow(
@@ -84,6 +98,39 @@ public class GroupTimeSlotService {
 
         groupTimeSlotRepository.delete(groupTimeSlot);
         log.info("Deleted group time slot: {}", groupTimeSlot);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupTimeSlot> getTeacherAvailableGroupTimeSlotsByDate(UUID teacherId, LocalDate date) {
+        Teacher teacher = getTeacherFromDB(teacherId);
+        LocalDateTime startTime = date.atStartOfDay();
+        LocalDateTime endTime = startTime.plusDays(1);
+        List<GroupTimeSlot> timeSlots = groupTimeSlotRepository.getAvailableByTeacher(teacher, startTime, endTime);
+        log.info("Find teacher available group time slots by date: {}", timeSlots.size());
+        return timeSlots;
+    }
+
+    @Transactional(readOnly = true)
+    public GroupTimeSlot getGroupTimeSlotById(UUID groupTimeslotId) {
+        GroupTimeSlot groupTimeSlot = groupTimeSlotRepository.findById(groupTimeslotId).orElseThrow(
+                () -> new IllegalArgumentException("GroupTimeSlot not found")
+        );
+        log.info("Found group time slot: {}", groupTimeSlot);
+        return groupTimeSlot;
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupTimeSlot> getUserGroupTimeSlotsByDay(UUID userId, LocalDate date) {
+        User user = userRepository.findById(userId).orElse(null);
+        if (user == null) {
+            return new ArrayList<>();
+        }
+
+        LocalDateTime startTime = date.atStartOfDay();
+        LocalDateTime endTime = startTime.plusDays(1);
+        List<GroupTimeSlot> groupTimeSlots = groupTimeSlotRepository.findByUserByDate(user, startTime, endTime);
+        log.info("Find user {} group time slots by day: {}", userId, groupTimeSlots.size());
+        return groupTimeSlots;
     }
 
     private void checkTeachersLesson(GroupLesson lesson, Teacher teacher) {
@@ -121,6 +168,4 @@ public class GroupTimeSlotService {
                 () -> new IllegalArgumentException("Teacher not found")
         );
     }
-
-
 }

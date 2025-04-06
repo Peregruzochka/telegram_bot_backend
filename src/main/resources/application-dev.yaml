@@ -15,10 +15,12 @@ spring:
 
     redis-channel:
       new-registration: create-registration
+      new-group-registration: create-group-registration
       not-confirmed: not-confirmed
       confirmed: confirmed
       local-cancel: local-cancel
       cancel: cancel
+      group-cancel: group-cancel
       first-question: first-question
       second-question: second-question
       qr-sender: qr-sender

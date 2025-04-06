@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 import ru.peregruzochka.telegram_bot_backend.dto.GroupRegistrationDto;
 import ru.peregruzochka.telegram_bot_backend.model.GroupRegistration;
 
+import java.util.List;
+
 @Component
 @RequiredArgsConstructor
 public class GroupRegistrationMapper {
@@ -30,5 +32,11 @@ public class GroupRegistrationMapper {
                 .timeSlot(groupTimeSlotMapper.toGroupTimeSlotDto(groupRegistration.getGroupTimeslot()))
                 .createdAt(groupRegistration.getCreatedAt())
                 .build();
+    }
+
+    public List<GroupRegistrationDto> toGroupRegistrationDtoList(List<GroupRegistration> groupRegistrations) {
+        return groupRegistrations.stream()
+                .map(this::toGroupRegistrationDto)
+                .toList();
     }
 }

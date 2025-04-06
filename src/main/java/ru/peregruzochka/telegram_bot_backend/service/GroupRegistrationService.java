@@ -11,6 +11,7 @@ import ru.peregruzochka.telegram_bot_backend.model.GroupRegistration;
 import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlot;
 import ru.peregruzochka.telegram_bot_backend.model.User;
 import ru.peregruzochka.telegram_bot_backend.model.UserStatus;
+import ru.peregruzochka.telegram_bot_backend.redis.NewGroupRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.repository.ChildRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.GroupRegistrationRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.GroupTimeSlotRepository;
@@ -33,6 +34,7 @@ public class GroupRegistrationService {
     private final UserRepository userRepository;
     private final ChildRepository childRepository;
     private final GroupRegistrationRepository groupRegistrationRepository;
+    private final NewGroupRegistrationEventPublisher newGroupRegistrationEventPublisher;
 
     @Transactional
     public GroupRegistration addGroupRegistration(GroupRegistration groupRegistration) {
@@ -64,7 +66,28 @@ public class GroupRegistrationService {
         groupTimeSlot.getRegistrations().add(newGroupRegistration);
         groupTimeSlotRepository.save(groupTimeSlot);
 
+        newGroupRegistrationEventPublisher.publish(newGroupRegistration);
         return newGroupRegistration;
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupRegistration> getAllActualRegistration(UUID userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("User not found")
+        );
+
+        List<GroupRegistration> registrations = groupRegistrationRepository.findAllActualByUser(user);
+        log.info("All actual user {} registrations: {}", userId, registrations);
+        return registrations;
+    }
+
+    @Transactional(readOnly = true)
+    public GroupRegistration getRegistrationById(UUID groupRegistrationId) {
+        GroupRegistration groupRegistration = groupRegistrationRepository.findById(groupRegistrationId).orElseThrow(
+                () -> new IllegalArgumentException("GroupRegistration not found")
+        );
+        log.info("Get group registration: {}", groupRegistration);
+        return groupRegistration;
     }
 
     private void checkChildUniqInTimeSlot(GroupTimeSlot groupTimeSlot, Child child) {
@@ -86,10 +109,9 @@ public class GroupRegistrationService {
     }
 
     private GroupTimeSlot getGroupTimeSlot(UUID groupTimeslotId) {
-        GroupTimeSlot groupTimeSlot = groupTimeSlotRepository.findById(groupTimeslotId).orElseThrow(
+        return groupTimeSlotRepository.findById(groupTimeslotId).orElseThrow(
                 () -> new IllegalArgumentException("GroupTimeSlot not found")
         );
-        return groupTimeSlot;
     }
 
     private User computeUser(User user) {
@@ -99,7 +121,12 @@ public class GroupRegistrationService {
                 yield userRepository.save(user);
             }
 
-            case REGULAR -> checkUser(user);
+            case REGULAR -> {
+                User regUser = checkUser(user);
+                regUser.setStatus(UserStatus.REGULAR);
+                yield regUser;
+            }
+
             case EDITING -> {
                 User dbUser = checkUser(user);
                 dbUser.setUserName(user.getUserName());
@@ -151,4 +178,6 @@ public class GroupRegistrationService {
             return NOT_CONFIRMED;
         }
     }
+
+
 }
