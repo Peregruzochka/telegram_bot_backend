@@ -11,6 +11,11 @@ import ru.peregruzochka.telegram_bot_backend.dto.LocalCancelEvent;
 import ru.peregruzochka.telegram_bot_backend.model.Cancel;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.service.CancelService;
+import ru.peregruzochka.telegram_bot_backend.service.GroupCancelService;
+
+import java.util.UUID;
+
+import static ru.peregruzochka.telegram_bot_backend.dto.LocalCancelEvent.CancelType.GROUP;
 
 @Slf4j
 @Component
@@ -19,6 +24,7 @@ public class LocalCancelRegistrationListener implements MessageListener {
 
     private final CancelService cancelService;
     private final ObjectMapper objectMapper;
+    private final GroupCancelService groupCancelService;
 
     @Override
     public void onMessage(Message message, byte[] pattern) {
@@ -27,16 +33,23 @@ public class LocalCancelRegistrationListener implements MessageListener {
         try {
             LocalCancelEvent cancelEvent = objectMapper.readValue(event, LocalCancelEvent.class);
 
-            Registration registration = Registration.builder()
-                    .id(cancelEvent.getRegistrationId())
-                    .build();
+            if (cancelEvent.getType() == LocalCancelEvent.CancelType.INDIVIDUAL) {
+                Registration registration = Registration.builder()
+                        .id(cancelEvent.getRegistrationId())
+                        .build();
 
-            Cancel cancel = Cancel.builder()
-                    .registration(registration)
-                    .caseDescription(cancelEvent.getCaseDescription())
-                    .build();
+                Cancel cancel = Cancel.builder()
+                        .registration(registration)
+                        .caseDescription(cancelEvent.getCaseDescription())
+                        .build();
 
-            cancelService.addCancel(cancel);
+                cancelService.addCancel(cancel);
+            } else if (cancelEvent.getType() == GROUP) {
+                UUID registrationId = cancelEvent.getRegistrationId();
+                String caseDescription = cancelEvent.getCaseDescription();
+                groupCancelService.addGroupCancel(registrationId, caseDescription);
+            }
+
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }

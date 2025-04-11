@@ -17,7 +17,9 @@ spring:
       new-registration: create-registration
       new-group-registration: create-group-registration
       not-confirmed: not-confirmed
+      group-not-confirmed: group-not-confirmed
       confirmed: confirmed
+      group-confirmed: group-confirmed
       local-cancel: local-cancel
       cancel: cancel
       group-cancel: group-cancel

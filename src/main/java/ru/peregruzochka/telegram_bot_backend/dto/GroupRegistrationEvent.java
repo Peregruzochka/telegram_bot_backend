@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -16,6 +17,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @ToString
 public class GroupRegistrationEvent {
+    private UUID registrationId;
+    private Long telegramId;
     private String username;
     private String userStatus;
     private String childName;

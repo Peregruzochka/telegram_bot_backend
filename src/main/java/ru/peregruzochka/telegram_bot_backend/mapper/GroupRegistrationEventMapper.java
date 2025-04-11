@@ -12,6 +12,8 @@ public class GroupRegistrationEventMapper {
 
     public GroupRegistrationEvent map(GroupRegistration groupRegistration) {
         return GroupRegistrationEvent.builder()
+                .telegramId(groupRegistration.getUser().getTelegramId())
+                .registrationId(groupRegistration.getId())
                 .username(groupRegistration.getUser().getUserName())
                 .userStatus(groupRegistration.getUser().getStatus().toString())
                 .childName(groupRegistration.getChild().getChildName())

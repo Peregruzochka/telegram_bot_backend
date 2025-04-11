@@ -16,4 +16,10 @@ import java.util.UUID;
 public class LocalCancelEvent {
     private UUID registrationId;
     private String caseDescription;
+    private CancelType type;
+
+    public enum CancelType {
+        INDIVIDUAL,
+        GROUP
+    }
 }

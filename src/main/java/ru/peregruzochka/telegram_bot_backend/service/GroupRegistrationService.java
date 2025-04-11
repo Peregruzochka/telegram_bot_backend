@@ -2,8 +2,10 @@ package ru.peregruzochka.telegram_bot_backend.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.peregruzochka.telegram_bot_backend.dto.LocalCancelEvent;
 import ru.peregruzochka.telegram_bot_backend.model.Child;
 import ru.peregruzochka.telegram_bot_backend.model.ChildStatus;
 import ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus;
@@ -12,7 +14,10 @@ import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlot;
 import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.model.User;
 import ru.peregruzochka.telegram_bot_backend.model.UserStatus;
+import ru.peregruzochka.telegram_bot_backend.redis.ConfirmGroupRegistrationEventPublisher;
+import ru.peregruzochka.telegram_bot_backend.redis.LocalCancelPublisher;
 import ru.peregruzochka.telegram_bot_backend.redis.NewGroupRegistrationEventPublisher;
+import ru.peregruzochka.telegram_bot_backend.redis.NotConfirmedGroupRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.repository.ChildRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.GroupRegistrationRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.GroupTimeSlotRepository;
@@ -25,8 +30,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static ru.peregruzochka.telegram_bot_backend.dto.LocalCancelEvent.CancelType.GROUP;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.AUTO_CONFIRMED;
+import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.CONFIRMED;
+import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.FIRST_QUESTION;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.NOT_CONFIRMED;
+import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.SECOND_QUESTION;
+import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.USER_CANCELLED;
 
 @Slf4j
 @Service
@@ -39,6 +49,18 @@ public class GroupRegistrationService {
     private final GroupRegistrationRepository groupRegistrationRepository;
     private final NewGroupRegistrationEventPublisher newGroupRegistrationEventPublisher;
     private final TeacherRepository teacherRepository;
+    private final NotConfirmedGroupRegistrationEventPublisher notConfirmedGroupRegistrationEventPublisher;
+    private final ConfirmGroupRegistrationEventPublisher confirmGroupRegistrationEventPublisher;
+    private final LocalCancelPublisher localCancelPublisher;
+
+    @Value("${approve-delay.first-approve}")
+    private int firstApproveDelay;
+
+    @Value("${approve-delay.second-approve}")
+    private int secondApproveDelay;
+
+    @Value("${approve-delay.cancel-registration}")
+    private int cancelRegistrationDelay;
 
     @Transactional
     public GroupRegistration addGroupRegistration(GroupRegistration groupRegistration) {
@@ -115,6 +137,55 @@ public class GroupRegistrationService {
         List<GroupRegistration> registrations = groupRegistrationRepository.findAllActualByTeacherByDate(teacher, start, end);
         log.info("All actual group registration by teacher {} by date [{}] {}", teacher, date, registrations);
         return registrations;
+    }
+
+    @Transactional
+    public List<GroupRegistration> getNotConfirmed() {
+        LocalDateTime time = LocalDateTime.now().plusHours(firstApproveDelay);
+
+        List<GroupRegistration> registrations = groupRegistrationRepository.findNotConfirmedAfterTime(time);
+        log.info("NOT_CONFIRMED group registrations found: {}", registrations.size());
+        registrations.forEach(registration -> registration.setConfirmStatus(FIRST_QUESTION));
+        groupRegistrationRepository.saveAll(registrations);
+        return registrations;
+    }
+
+    @Transactional
+    public GroupRegistration confirm(UUID registrationId) {
+        GroupRegistration groupRegistration = groupRegistrationRepository.findById(registrationId).orElseThrow(
+                () -> new IllegalArgumentException("Registration not found")
+        );
+        if (groupRegistration.getConfirmStatus() == FIRST_QUESTION
+                || groupRegistration.getConfirmStatus() == SECOND_QUESTION) {
+            groupRegistration.setConfirmStatus(CONFIRMED);
+            log.info("Confirm group registration: {}", groupRegistration);
+            confirmGroupRegistrationEventPublisher.publish(groupRegistration);
+            return groupRegistrationRepository.save(groupRegistration);
+        } else {
+            return groupRegistration;
+        }
+    }
+
+    @Transactional
+    public GroupRegistration decline(UUID registrationId) {
+        GroupRegistration groupRegistration = groupRegistrationRepository.findById(registrationId).orElseThrow(
+                () -> new IllegalArgumentException("Registration not found")
+        );
+        if (groupRegistration.getConfirmStatus() == FIRST_QUESTION || groupRegistration.getConfirmStatus() == SECOND_QUESTION) {
+            groupRegistration.setConfirmStatus(USER_CANCELLED);
+            log.info("Decline group registration: {}", groupRegistration);
+
+            LocalCancelEvent cancelEvent = LocalCancelEvent.builder()
+                    .registrationId(groupRegistration.getId())
+                    .caseDescription("Клиент отказался от занятия после вопроса о подтверждении")
+                    .type(GROUP)
+                    .build();
+
+            localCancelPublisher.publish(cancelEvent);
+            return groupRegistrationRepository.save(groupRegistration);
+        } else {
+            return groupRegistration;
+        }
     }
 
     private void checkChildUniqInTimeSlot(GroupTimeSlot groupTimeSlot, Child child) {

@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static ru.peregruzochka.telegram_bot_backend.dto.LocalCancelEvent.CancelType.INDIVIDUAL;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.AUTO_CANCELLED;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.AUTO_CONFIRMED;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.AUTO_CONFIRMED_QR;
@@ -240,6 +241,7 @@ public class RegistrationService {
             LocalCancelEvent localCancelEvent = LocalCancelEvent.builder()
                     .registrationId(registrationId)
                     .caseDescription("Клиент отказался от занятия после вопроса о подтверждении")
+                    .type(INDIVIDUAL)
                     .build();
 
             localCancelPublisher.publish(localCancelEvent);

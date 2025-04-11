@@ -2,6 +2,7 @@ package ru.peregruzochka.telegram_bot_backend.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -48,6 +49,6 @@ public class GroupTimeSlot {
     private GroupLesson groupLesson;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "groupTimeslot")
+    @OneToMany(mappedBy = "groupTimeslot", fetch = FetchType.EAGER)
     private List<GroupRegistration> registrations;
 }

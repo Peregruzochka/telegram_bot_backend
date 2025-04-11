@@ -50,4 +50,11 @@ public interface GroupRegistrationRepository extends JpaRepository<GroupRegistra
             order by r.groupTimeslot.startTime
             """)
     List<GroupRegistration> findAllActualByTeacherByDate(Teacher teacher, LocalDateTime from, LocalDateTime to);
+
+    @Query("""
+           select r from GroupRegistration r
+           where r.groupTimeslot.startTime < :time
+           and r.confirmStatus = "NOT_CONFIRMED"
+           """)
+    List<GroupRegistration> findNotConfirmedAfterTime(LocalDateTime time);
 }

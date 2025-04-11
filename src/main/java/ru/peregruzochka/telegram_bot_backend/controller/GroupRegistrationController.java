@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -55,5 +56,17 @@ public class GroupRegistrationController {
                                                                            @RequestParam("date") LocalDate date) {
         List<GroupRegistration> registrations = groupRegistrationService.getAllActualRegistrationByTeacherByDate(teacherId, date);
         return groupRegistrationMapper.toGroupRegistrationDtoList(registrations);
+    }
+
+    @PutMapping("/{registration-id}/confirm")
+    public GroupRegistrationDto confirmGroupRegistration(@PathVariable("registration-id") UUID registrationId) {
+        GroupRegistration registration = groupRegistrationService.confirm(registrationId);
+        return groupRegistrationMapper.toGroupRegistrationDto(registration);
+    }
+
+    @PutMapping("/{registration-id}/decline")
+    public GroupRegistrationDto declineGroupRegistration(@PathVariable("registration-id") UUID registrationId) {
+        GroupRegistration registration = groupRegistrationService.decline(registrationId);
+       return groupRegistrationMapper.toGroupRegistrationDto(registration);
     }
 }

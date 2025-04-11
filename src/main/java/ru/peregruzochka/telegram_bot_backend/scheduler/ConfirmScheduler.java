@@ -3,11 +3,14 @@ package ru.peregruzochka.telegram_bot_backend.scheduler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import ru.peregruzochka.telegram_bot_backend.model.GroupRegistration;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.redis.FirstQuestionRegistrationEventPublisher;
+import ru.peregruzochka.telegram_bot_backend.redis.NotConfirmedGroupRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.redis.NotConfirmedRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.redis.QRSenderPublisher;
 import ru.peregruzochka.telegram_bot_backend.redis.SecondQuestionRegistrationEventPublisher;
+import ru.peregruzochka.telegram_bot_backend.service.GroupRegistrationService;
 import ru.peregruzochka.telegram_bot_backend.service.RegistrationService;
 
 import java.util.List;
@@ -21,11 +24,15 @@ public class ConfirmScheduler {
     private final FirstQuestionRegistrationEventPublisher firstQuestionRegistrationEventPublisher;
     private final SecondQuestionRegistrationEventPublisher secondQuestionRegistrationEventPublisher;
     private final QRSenderPublisher qrSenderPublisher;
+    private final GroupRegistrationService groupRegistrationService;
+    private final NotConfirmedGroupRegistrationEventPublisher notConfirmedGroupRegistrationEventPublisher;
 
     @Scheduled(cron = "${scheduler.get-non-confirmed}")
     public void schedule() {
         List<Registration> registrations = registrationService.getNotConfirmed();
         registrations.forEach(notConfirmedRegistrationEventPublisher::publish);
+        List<GroupRegistration> groupRegistrations = groupRegistrationService.getNotConfirmed();
+        groupRegistrations.forEach(notConfirmedGroupRegistrationEventPublisher::publish);
 
         List<Registration> registrationsTwo = registrationService.getFirstQuestionRegistration();
         registrationsTwo.forEach(firstQuestionRegistrationEventPublisher::publish);
