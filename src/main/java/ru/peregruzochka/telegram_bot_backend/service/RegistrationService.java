@@ -189,6 +189,7 @@ public class RegistrationService {
                 .map(id -> LocalCancelEvent.builder()
                         .registrationId(id)
                         .caseDescription("Автоматическая отмена занятия")
+                        .type(INDIVIDUAL)
                         .build()
                 )
                 .forEach(localCancelPublisher::publish);

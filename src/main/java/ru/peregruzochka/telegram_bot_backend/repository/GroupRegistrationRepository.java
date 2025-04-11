@@ -57,4 +57,25 @@ public interface GroupRegistrationRepository extends JpaRepository<GroupRegistra
            and r.confirmStatus = "NOT_CONFIRMED"
            """)
     List<GroupRegistration> findNotConfirmedAfterTime(LocalDateTime time);
+
+    @Query("""
+            select r from GroupRegistration r
+            where r.groupTimeslot.startTime < :time
+            and r.confirmStatus = "FIRST_QUESTION"
+            """)
+    List<GroupRegistration> findFirstQuestionAfterTime(LocalDateTime time);
+
+    @Query("""
+            select r from GroupRegistration r
+            where r.groupTimeslot.startTime < :time
+            and r.confirmStatus = "SECOND_QUESTION"
+            """)
+    List<GroupRegistration> findSecondQuestionAfterTime(LocalDateTime time);
+    @Query("""
+            select r from GroupRegistration r
+            where r.groupTimeslot.startTime > :start
+            and r.groupTimeslot.startTime < :end
+            and r.confirmStatus = "AUTO_CONFIRMED"
+            """)
+    List<GroupRegistration> findAutoConfirmedBetween(LocalDateTime start, LocalDateTime end);
 }

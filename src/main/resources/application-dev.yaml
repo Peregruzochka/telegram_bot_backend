@@ -24,8 +24,11 @@ spring:
       cancel: cancel
       group-cancel: group-cancel
       first-question: first-question
+      group-first-question: group-first-question
       second-question: second-question
+      group-second-question: group-second-question
       qr-sender: qr-sender
+      group-qr-sender: group-qr-sender
   jpa:
     hibernate:
       ddl-auto: none

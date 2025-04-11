@@ -31,7 +31,9 @@ import java.util.List;
 import java.util.UUID;
 
 import static ru.peregruzochka.telegram_bot_backend.dto.LocalCancelEvent.CancelType.GROUP;
+import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.AUTO_CANCELLED;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.AUTO_CONFIRMED;
+import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.AUTO_CONFIRMED_QR;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.CONFIRMED;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.FIRST_QUESTION;
 import static ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus.NOT_CONFIRMED;
@@ -49,7 +51,6 @@ public class GroupRegistrationService {
     private final GroupRegistrationRepository groupRegistrationRepository;
     private final NewGroupRegistrationEventPublisher newGroupRegistrationEventPublisher;
     private final TeacherRepository teacherRepository;
-    private final NotConfirmedGroupRegistrationEventPublisher notConfirmedGroupRegistrationEventPublisher;
     private final ConfirmGroupRegistrationEventPublisher confirmGroupRegistrationEventPublisher;
     private final LocalCancelPublisher localCancelPublisher;
 
@@ -148,6 +149,55 @@ public class GroupRegistrationService {
         registrations.forEach(registration -> registration.setConfirmStatus(FIRST_QUESTION));
         groupRegistrationRepository.saveAll(registrations);
         return registrations;
+    }
+
+    @Transactional
+    public List<GroupRegistration> getFirstQuestionRegistration() {
+        LocalDateTime time = LocalDateTime.now()
+                .plusHours(firstApproveDelay)
+                .minusHours(secondApproveDelay);
+
+        List<GroupRegistration> registrations = groupRegistrationRepository.findFirstQuestionAfterTime(time);
+        log.info("FIRST_QUESTION group registrations found: {}", registrations.size());
+        registrations.forEach(registration -> registration.setConfirmStatus(SECOND_QUESTION));
+        groupRegistrationRepository.saveAll(registrations);
+        return registrations;
+    }
+
+    @Transactional
+    public List<GroupRegistration> getSecondQuestionRegistration() {
+        LocalDateTime time = LocalDateTime.now()
+                .plusHours(firstApproveDelay)
+                .minusHours(secondApproveDelay)
+                .minusHours(cancelRegistrationDelay);
+
+        List<GroupRegistration> registrations = groupRegistrationRepository.findSecondQuestionAfterTime(time);
+        log.info("SECOND_QUESTION group registrations found: {}", registrations.size());
+        registrations.forEach(registration -> registration.setConfirmStatus(AUTO_CANCELLED));
+        groupRegistrationRepository.saveAll(registrations);
+
+        registrations.stream()
+                .map(GroupRegistration::getId)
+                .map(id -> LocalCancelEvent.builder()
+                        .registrationId(id)
+                        .caseDescription("Автоматическая отмена занятия")
+                        .type(GROUP)
+                        .build()
+                )
+                .forEach(localCancelPublisher::publish);
+
+        return registrations;
+    }
+
+    @Transactional
+    public List<GroupRegistration> getAutoConfirmedRegistration() {
+        LocalDateTime start = LocalDateTime.now();
+        LocalDateTime end = start.plusHours(1);
+        List<GroupRegistration> groupRegistrations = groupRegistrationRepository.findAutoConfirmedBetween(start, end);
+        log.info("AUTO_CONFIRMED group registrations found: {}", groupRegistrations.size());
+        groupRegistrations.forEach(registration -> registration.setConfirmStatus(AUTO_CONFIRMED_QR));
+        groupRegistrationRepository.saveAll(groupRegistrations);
+        return groupRegistrations;
     }
 
     @Transactional
