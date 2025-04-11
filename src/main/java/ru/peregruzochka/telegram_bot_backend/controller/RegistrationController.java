@@ -54,6 +54,19 @@ public class RegistrationController {
         return registrationMapper.toRegistrationDtoList(registrations);
     }
 
+    @GetMapping("/search-actual-by-date")
+    public List<RegistrationDto> getAllActualRegistrationsByToday(@RequestParam("date") LocalDate date) {
+        List<Registration> registrations = registrationService.getAllActualRegistrationByDate(date);
+        return registrationMapper.toRegistrationDtoList(registrations);
+    }
+
+    @GetMapping("/search-actual-by-teacher-by-date")
+    public List<RegistrationDto> getAllActualRegistrationsByTeacherByDate(@RequestParam("teacher-id") UUID teacherId,
+                                                                          @RequestParam("date") LocalDate date) {
+        List<Registration> registrations = registrationService.getAllActualRegistrationByTeacherByDate(teacherId, date);
+        return registrationMapper.toRegistrationDtoList(registrations);
+    }
+
     @GetMapping("/search-by-date")
     public List<RegistrationDto> getAllRegistrationsByDate(@RequestParam("date") LocalDate date) {
         List<Registration> registrations = registrationService.getAllRegistrationByDate(date);

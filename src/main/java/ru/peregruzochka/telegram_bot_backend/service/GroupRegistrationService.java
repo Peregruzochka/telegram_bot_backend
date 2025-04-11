@@ -9,14 +9,17 @@ import ru.peregruzochka.telegram_bot_backend.model.ChildStatus;
 import ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus;
 import ru.peregruzochka.telegram_bot_backend.model.GroupRegistration;
 import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlot;
+import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.model.User;
 import ru.peregruzochka.telegram_bot_backend.model.UserStatus;
 import ru.peregruzochka.telegram_bot_backend.redis.NewGroupRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.repository.ChildRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.GroupRegistrationRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.GroupTimeSlotRepository;
+import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.UserRepository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,6 +38,7 @@ public class GroupRegistrationService {
     private final ChildRepository childRepository;
     private final GroupRegistrationRepository groupRegistrationRepository;
     private final NewGroupRegistrationEventPublisher newGroupRegistrationEventPublisher;
+    private final TeacherRepository teacherRepository;
 
     @Transactional
     public GroupRegistration addGroupRegistration(GroupRegistration groupRegistration) {
@@ -88,6 +92,29 @@ public class GroupRegistrationService {
         );
         log.info("Get group registration: {}", groupRegistration);
         return groupRegistration;
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupRegistration> getAllActualRegistrationByDate(LocalDate date) {
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+        List<GroupRegistration> registrations = groupRegistrationRepository.findAllActualByDate(start, end);
+        log.info("All actual group registration by date [{}] {}", date, registrations);
+        return registrations;
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupRegistration> getAllActualRegistrationByTeacherByDate(UUID teacherId, LocalDate date) {
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+
+        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found")
+        );
+
+        List<GroupRegistration> registrations = groupRegistrationRepository.findAllActualByTeacherByDate(teacher, start, end);
+        log.info("All actual group registration by teacher {} by date [{}] {}", teacher, date, registrations);
+        return registrations;
     }
 
     private void checkChildUniqInTimeSlot(GroupTimeSlot groupTimeSlot, Child child) {

@@ -249,6 +249,29 @@ public class RegistrationService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<Registration> getAllActualRegistrationByDate(LocalDate date) {
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+        List<Registration> registrations = registrationRepository.findAllActualByDate(start, end);
+        log.info("All registrations by date [{}] found: {}", date, registrations.size());
+        return registrations;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Registration> getAllActualRegistrationByTeacherByDate(UUID teacherId, LocalDate date) {
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = start.plusDays(1);
+
+        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found")
+        );
+
+        List<Registration> registrations = registrationRepository.findAllActualByTeacherByDate(teacher, start, end);
+        log.info("All registrations by teacher[{}] by date [{}] found: {}", teacher, date, registrations.size());
+        return registrations;
+    }
+
 
     private void computeChild(Child child, User user) {
         switch (child.getStatus()) {
@@ -322,4 +345,6 @@ public class RegistrationService {
             throw new IllegalArgumentException("TimeSlot is not available");
         }
     }
+
+
 }

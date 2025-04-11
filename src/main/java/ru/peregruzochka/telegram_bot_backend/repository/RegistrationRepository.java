@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
+import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.model.User;
 
 import java.time.LocalDateTime;
@@ -24,6 +25,31 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
         order by r.timeslot.startTime
         """)
     List<Registration> findAllActualByUser(User user);
+
+    @Query("""
+        select r from Registration r
+        where not exists (
+            select 1 from Cancel c
+            where c.registration = r
+        )
+        and r.timeslot.startTime >= :from
+        and r.timeslot.startTime <= :to
+        order by r.timeslot.startTime
+        """)
+    List<Registration> findAllActualByDate(LocalDateTime from, LocalDateTime to);
+
+    @Query("""
+        select r from Registration r
+        where not exists (
+            select 1 from Cancel c
+            where c.registration = r
+        )
+        and r.timeslot.teacher = :teacher
+        and r.timeslot.startTime >= :from
+        and r.timeslot.startTime <= :to
+        order by r.timeslot.startTime
+        """)
+    List<Registration> findAllActualByTeacherByDate(Teacher teacher, LocalDateTime from, LocalDateTime to);
 
     @Query("""
            select r from Registration r
@@ -61,5 +87,6 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
             and r.confirmStatus = "AUTO_CONFIRMED"
             """)
     List<Registration> findAutoConfirmedBetween(LocalDateTime start, LocalDateTime end);
+
 
 }

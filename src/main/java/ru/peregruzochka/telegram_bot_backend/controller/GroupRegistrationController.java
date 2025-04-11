@@ -13,6 +13,7 @@ import ru.peregruzochka.telegram_bot_backend.mapper.GroupRegistrationMapper;
 import ru.peregruzochka.telegram_bot_backend.model.GroupRegistration;
 import ru.peregruzochka.telegram_bot_backend.service.GroupRegistrationService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -41,5 +42,18 @@ public class GroupRegistrationController {
     public GroupRegistrationDto getGroupRegistration(@PathVariable("group-registration-id") UUID groupRegistrationId) {
         GroupRegistration registration = groupRegistrationService.getRegistrationById(groupRegistrationId);
         return groupRegistrationMapper.toGroupRegistrationDto(registration);
+    }
+
+    @GetMapping("/search-actual-by-date")
+    public List<GroupRegistrationDto> getAllActualRegistrationsByDate(@RequestParam("date") LocalDate date) {
+        List<GroupRegistration> registrations = groupRegistrationService.getAllActualRegistrationByDate(date);
+        return groupRegistrationMapper.toGroupRegistrationDtoList(registrations);
+    }
+
+    @GetMapping("/search-actual-by-teacher-by-date")
+    public List<GroupRegistrationDto> getAllActualGroupRegistrationsByTeacherByDate(@RequestParam("teacher-id") UUID teacherId,
+                                                                           @RequestParam("date") LocalDate date) {
+        List<GroupRegistration> registrations = groupRegistrationService.getAllActualRegistrationByTeacherByDate(teacherId, date);
+        return groupRegistrationMapper.toGroupRegistrationDtoList(registrations);
     }
 }
