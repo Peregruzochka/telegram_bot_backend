@@ -31,7 +31,7 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, UUID> {
             or
             :from = t.startTime and :to > t.startTime and :from < t.endTime and :to = t.endTime
             or
-            :from > t.startTime and :to < t.startTime and :from < t.endTime and :to > t.endTime
+            :from > t.startTime and :to > t.startTime and :from < t.endTime and :to > t.endTime
         )
         """)
     List<TimeSlot> findOverlappingTimeSlots(Teacher teacher, LocalDateTime from, LocalDateTime to);
