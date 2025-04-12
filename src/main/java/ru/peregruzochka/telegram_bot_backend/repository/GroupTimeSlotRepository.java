@@ -15,10 +15,16 @@ import java.util.UUID;
 public interface GroupTimeSlotRepository extends JpaRepository<GroupTimeSlot, UUID> {
 
     @Query("""
-        select t from GroupTimeSlot t
-        where t.teacher = :teacher
-        and (t.startTime <= :from and t.endTime > :from or t.startTime < :to and t.endTime >= :to)
-        """)
+            select t from GroupTimeSlot t
+            where t.teacher = :teacher
+            and (
+                :from < t.startTime and :to > t.startTime and :from < t.endTime and :to < t.endTime
+                or
+                :from = t.startTime and :to > t.startTime and :from < t.endTime and :to = t.endTime
+                or
+                :from > t.startTime and :to < t.startTime and :from < t.endTime and :to > t.endTime
+            )
+            """)
     List<GroupTimeSlot> findOverlappingTimeSlots(Teacher teacher, LocalDateTime from, LocalDateTime to);
 
     List<GroupTimeSlot> getGroupTimeSlotByTeacherAndStartTimeBetween(Teacher teacher, LocalDateTime start, LocalDateTime end);
