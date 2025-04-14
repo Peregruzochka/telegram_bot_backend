@@ -3,6 +3,7 @@ package ru.peregruzochka.telegram_bot_backend.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import ru.peregruzochka.telegram_bot_backend.model.GroupLesson;
 import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlot;
 import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.model.User;
@@ -46,4 +47,14 @@ public interface GroupTimeSlotRepository extends JpaRepository<GroupTimeSlot, UU
             and r.user = :user
             """)
     List<GroupTimeSlot> findByUserByDate(User user, LocalDateTime from, LocalDateTime to);
+
+    @Query("""
+            select t from GroupTimeSlot t
+            where t.teacher = :teacher
+            and t.groupLesson = :lesson
+            and t.startTime >= :from and t.startTime <= :to
+            and (t.groupLesson.groupSize > SIZE(t.registrations))
+            order by t.startTime
+            """)
+    List<GroupTimeSlot> getAvailableByTeacherByLesson(Teacher teacher, GroupLesson lesson, LocalDateTime from, LocalDateTime to);
 }
