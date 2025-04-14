@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.peregruzochka.telegram_bot_backend.model.GroupLesson;
 import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlot;
+import ru.peregruzochka.telegram_bot_backend.model.Lesson;
 import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
 import ru.peregruzochka.telegram_bot_backend.model.User;
@@ -86,6 +87,17 @@ public class GroupTimeSlotService {
         return groupTimeSlots;
     }
 
+    @Transactional(readOnly = true)
+    public List<GroupTimeSlot> getTeacherGroupTimeSlotsInNextMonthByLesson(UUID teacherId, UUID lessonId) {
+        Teacher teacher = getTeacherFromDB(teacherId);
+        GroupLesson lesson = getGroupLessonFromDB(lessonId);
+        LocalDateTime startTime = LocalDateTime.now();
+        LocalDateTime endTime = startTime.plusMonths(1);
+        List<GroupTimeSlot> groupTimeSlots = groupTimeSlotRepository.getAvailableByTeacherByLesson(teacher, lesson, startTime, endTime);
+        log.info("Find teacher group time slots by lesson {}: {}", lesson, groupTimeSlots.size());
+        return groupTimeSlots;
+    }
+
     @Transactional
     public void delete(UUID groupTimeslotId) {
         GroupTimeSlot groupTimeSlot = groupTimeSlotRepository.findById(groupTimeslotId).orElseThrow(
@@ -111,6 +123,17 @@ public class GroupTimeSlotService {
     }
 
     @Transactional(readOnly = true)
+    public List<GroupTimeSlot> getTeacherAvailableGroupTimeSlotsByDateByLesson(UUID teacherId, UUID lessonId, LocalDate date) {
+        Teacher teacher = getTeacherFromDB(teacherId);
+        GroupLesson lesson = getGroupLessonFromDB(lessonId);
+        LocalDateTime startTime = date.atStartOfDay();
+        LocalDateTime endTime = startTime.plusDays(1);
+        List<GroupTimeSlot> timeSlots = groupTimeSlotRepository.getAvailableByTeacherByLesson(teacher, lesson, startTime, endTime);
+        log.info("Find teacher group time slots by lesson {}: {}", lesson, timeSlots.size());
+        return timeSlots;
+    }
+
+    @Transactional(readOnly = true)
     public GroupTimeSlot getGroupTimeSlotById(UUID groupTimeslotId) {
         GroupTimeSlot groupTimeSlot = groupTimeSlotRepository.findById(groupTimeslotId).orElseThrow(
                 () -> new IllegalArgumentException("GroupTimeSlot not found")
@@ -132,6 +155,7 @@ public class GroupTimeSlotService {
         log.info("Find user {} group time slots by day: {}", userId, groupTimeSlots.size());
         return groupTimeSlots;
     }
+
 
     private void checkTeachersLesson(GroupLesson lesson, Teacher teacher) {
         if (!lesson.getTeachers().contains(teacher)) {
@@ -168,4 +192,6 @@ public class GroupTimeSlotService {
                 () -> new IllegalArgumentException("Teacher not found")
         );
     }
+
+
 }

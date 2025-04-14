@@ -48,9 +48,24 @@ public class GroupTimeSlotController {
         return groupTimeSlotMapper.toGroupTimeSlotDtoList(groupTimeSlots);
     }
 
+    @GetMapping("/available-by-date-by-lesson")
+    public List<GroupTimeSlotDto> getAvailableGroupTimeSlotsByDate(@RequestParam("teacher-id") UUID teacherId,
+                                                                   @RequestParam("lesson-id") UUID lessonId,
+                                                                   @RequestParam("date") LocalDate date) {
+        List<GroupTimeSlot> groupTimeSlots = groupTimeSlotService.getTeacherAvailableGroupTimeSlotsByDateByLesson(teacherId, lessonId, date);
+        return groupTimeSlotMapper.toGroupTimeSlotDtoList(groupTimeSlots);
+    }
+
     @GetMapping("/next-month-search")
     public List<GroupTimeSlotDto> getTeacherGroupTimeSlotInNextMonth(@RequestParam("teacher-id") UUID teacherId) {
         List<GroupTimeSlot> groupTimeSlots = groupTimeSlotService.getTeacherGroupTimeSlotsInNextMonth(teacherId);
+        return groupTimeSlotMapper.toGroupTimeSlotDtoList(groupTimeSlots);
+    }
+
+    @GetMapping("/next-month-search-by-lesson")
+    public List<GroupTimeSlotDto> getTeacherGroupTimeSlotInNextMonthByLesson(@RequestParam("teacher-id") UUID teacherId,
+                                                                             @RequestParam("lesson-id") UUID lessonId) {
+        List<GroupTimeSlot> groupTimeSlots = groupTimeSlotService.getTeacherGroupTimeSlotsInNextMonthByLesson(teacherId, lessonId);
         return groupTimeSlotMapper.toGroupTimeSlotDtoList(groupTimeSlots);
     }
 
