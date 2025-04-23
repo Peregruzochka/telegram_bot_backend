@@ -303,7 +303,12 @@ public class RegistrationService {
                 yield userRepository.save(user);
             }
 
-            case REGULAR -> checkUser(user);
+            case REGULAR -> {
+                User regUser = checkUser(user);
+                regUser.setStatus(UserStatus.REGULAR);
+                yield regUser;
+            }
+
             case EDITING -> {
                 User dbUser = checkUser(user);
                 dbUser.setUserName(user.getUserName());
