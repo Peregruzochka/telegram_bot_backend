@@ -17,6 +17,7 @@ import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.service.TeacherService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 @RestController
@@ -45,6 +46,18 @@ public class TeacherController {
     @GetMapping("/group-teachers")
     public List<TeacherDto> getGroupTeacher() {
         List<Teacher> teachers = teacherService.getGroupTeachers();
+        return teacherMapper.toTeacherDtoList(teachers);
+    }
+
+    @GetMapping("/by-lesson")
+    public List<TeacherDto> getTeachersByLesson(@RequestParam UUID lessonId) {
+        List<Teacher> teachers = teacherService.getTeachersByLessonId(lessonId);
+        return teacherMapper.toTeacherDtoList(teachers);
+    }
+
+    @GetMapping("/by-group-lesson")
+    public List<TeacherDto> getTeachersByGroupLesson(@RequestParam UUID lessonId) {
+        List<Teacher> teachers = teacherService.getTeachersByGroupLessonId(lessonId);
         return teacherMapper.toTeacherDtoList(teachers);
     }
 }
