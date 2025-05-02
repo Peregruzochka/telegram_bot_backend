@@ -13,7 +13,9 @@ import ru.peregruzochka.telegram_bot_backend.repository.GroupTimeSlotPatternRepo
 import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 
 import java.time.LocalTime;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -37,6 +39,8 @@ public class GroupTimeSlotPatternService {
                 () -> new IllegalArgumentException("Lesson not found")
         );
 
+        checkTeacherLesson(teacher, lesson);
+
         GroupTimeSlotPattern groupTimeSlotPattern = GroupTimeSlotPattern.builder()
                 .dayOfWeek(dayOfWeek)
                 .startTime(startTime)
@@ -48,5 +52,16 @@ public class GroupTimeSlotPatternService {
         GroupTimeSlotPattern savedGroupTimeSlotPattern = groupTimeSlotPatternRepository.save(groupTimeSlotPattern);
         log.info("Created GroupTimeSlotPattern: {}", savedGroupTimeSlotPattern);
         return savedGroupTimeSlotPattern;
+    }
+
+
+    private void checkTeacherLesson(Teacher teacher, GroupLesson lesson) {
+        Set<UUID> lessonIds = teacher.getGroupLessons().stream()
+                .map(GroupLesson::getId)
+                .collect(Collectors.toSet());
+
+        if (!lessonIds.contains(lesson.getId())) {
+            throw new IllegalArgumentException("Lesson not for the teacher: " + teacher);
+        }
     }
 }

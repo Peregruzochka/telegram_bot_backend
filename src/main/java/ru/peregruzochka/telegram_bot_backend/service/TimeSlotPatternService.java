@@ -44,7 +44,7 @@ public class TimeSlotPatternService {
         return savedPattern;
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public void checkPatternOverlapping(DayOfWeek dayOfWeek, LocalTime startTime, Teacher teacher) {
         LocalTime endTime = startTime.plusMinutes(45);
 
