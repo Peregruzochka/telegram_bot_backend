@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
@@ -37,11 +38,11 @@ public class TimeSlotPattern {
     @Enumerated(EnumType.ORDINAL)
     private DayOfWeek dayOfWeek;
 
-    @Column(name = "start_hour", nullable = false)
-    private int startHour;
+    @Column(name = "start_time", nullable = false)
+    private LocalTime startTime;
 
-    @Column(name = "start_min", nullable = false)
-    private int startMin;
+    @Column(name = "end_time", nullable = false)
+    private LocalTime endTime;
 
     @ManyToOne
     @JoinColumn(name = "teacher_id", nullable = false)
