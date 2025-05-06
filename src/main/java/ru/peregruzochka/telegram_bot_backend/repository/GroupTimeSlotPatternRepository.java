@@ -35,4 +35,6 @@ public interface GroupTimeSlotPatternRepository extends JpaRepository<GroupTimeS
             order by t.startTime
             """)
     List<GroupTimeSlotPattern> findByTeacherAndDayOfWeek(Teacher teacher, DayOfWeek day);
+
+    List<GroupTimeSlotPattern> findByDayOfWeek(DayOfWeek day);
 }

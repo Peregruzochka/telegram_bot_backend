@@ -35,4 +35,6 @@ public interface TimeSlotPatternRepository extends JpaRepository<TimeSlotPattern
             order by t.startTime
             """)
     List<TimeSlotPattern> findByTeacherAndDayOfWeek(Teacher teacher, DayOfWeek day);
+
+    List<TimeSlotPattern> findByDayOfWeek(DayOfWeek day);
 }
