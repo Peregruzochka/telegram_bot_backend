@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import ru.peregruzochka.telegram_bot_backend.dto.GroupTimeSlotPatternDto;
 import ru.peregruzochka.telegram_bot_backend.mapper.GroupTimeSlotPatternMapper;
-import ru.peregruzochka.telegram_bot_backend.model.DayOfWeek;
 import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlotPattern;
 import ru.peregruzochka.telegram_bot_backend.service.GroupTimeSlotPatternService;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;

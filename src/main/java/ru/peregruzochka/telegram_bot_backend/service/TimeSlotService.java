@@ -11,6 +11,7 @@ import ru.peregruzochka.telegram_bot_backend.repository.GroupTimeSlotRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotRepository;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -116,6 +117,15 @@ public class TimeSlotService {
         );
         log.info("Get time slot {}", timeSlot);
         return timeSlot;
+    }
+
+    @Transactional
+    public void fillByPattens(LocalDateTime from, LocalDateTime to) {
+        LocalDateTime day = from;
+        while (day.isBefore(to.plusDays(1))) {
+            DayOfWeek dayOfWeek = day.getDayOfWeek();
+
+        }
     }
 
     private void checkOverlapping(Teacher teacher, LocalDateTime start, LocalDateTime end) {

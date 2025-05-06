@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.peregruzochka.telegram_bot_backend.model.DayOfWeek;
 import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlotPattern;
 import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlotPattern;
@@ -12,6 +11,7 @@ import ru.peregruzochka.telegram_bot_backend.repository.GroupTimeSlotPatternRepo
 import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotPatternRepository;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
