@@ -13,6 +13,7 @@ import ru.peregruzochka.telegram_bot_backend.repository.GroupTimeSlotPatternRepo
 import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -61,6 +62,17 @@ public class GroupTimeSlotPatternService {
         }
         groupTimeSlotPatternRepository.deleteById(groupTimeSlotPatternId);
         log.info("Deleted GroupTimeSlotPattern: {}", groupTimeSlotPatternId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupTimeSlotPattern> getPatternByTeacherAndDayOfWeek(UUID teacherId, DayOfWeek dayOfWeek) {
+        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found")
+        );
+
+        List<GroupTimeSlotPattern> patterns = groupTimeSlotPatternRepository.findByTeacherAndDayOfWeek(teacher, dayOfWeek);
+        log.info("Find pattens: {}", patterns.size());
+        return patterns;
     }
 
     private void checkTeacherLesson(Teacher teacher, GroupLesson lesson) {

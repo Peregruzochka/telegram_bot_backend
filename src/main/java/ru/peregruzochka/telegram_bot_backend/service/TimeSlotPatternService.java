@@ -69,4 +69,15 @@ public class TimeSlotPatternService {
         timeSlotPatternRepository.deleteById(timeSlotPatternId);
         log.info("Deleted TimeSlotPattern: {}", timeSlotPatternId);
     }
+
+    @Transactional(readOnly = true)
+    public List<TimeSlotPattern> getPatternByTeacherAndDayOfWeek(UUID teacherId, DayOfWeek dayOfWeek) {
+        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found")
+        );
+
+        List<TimeSlotPattern> patterns = timeSlotPatternRepository.findByTeacherAndDayOfWeek(teacher, dayOfWeek);
+        log.info("Found {} patterns", patterns.size());
+        return patterns;
+    }
 }

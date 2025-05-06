@@ -27,4 +27,12 @@ public interface TimeSlotPatternRepository extends JpaRepository<TimeSlotPattern
                  )
             """)
     List<TimeSlotPattern> findOverLappingPatterns(Teacher teacher, DayOfWeek day, LocalTime from, LocalTime to);
+
+    @Query("""
+            select t from TimeSlotPattern t
+            where t.teacher = :teacher
+            and t.dayOfWeek = :day
+            order by t.startTime
+            """)
+    List<TimeSlotPattern> findByTeacherAndDayOfWeek(Teacher teacher, DayOfWeek day);
 }

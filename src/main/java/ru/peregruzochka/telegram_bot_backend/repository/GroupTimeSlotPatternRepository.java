@@ -27,4 +27,12 @@ public interface GroupTimeSlotPatternRepository extends JpaRepository<GroupTimeS
                  )
             """)
     List<GroupTimeSlotPattern> findOverLappingPatterns(Teacher teacher, DayOfWeek day, LocalTime from, LocalTime to);
+
+    @Query("""
+            select t from GroupTimeSlotPattern t
+            where t.teacher = :teacher
+            and t.dayOfWeek = :day
+            order by t.startTime
+            """)
+    List<GroupTimeSlotPattern> findByTeacherAndDayOfWeek(Teacher teacher, DayOfWeek day);
 }

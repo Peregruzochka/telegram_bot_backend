@@ -3,6 +3,7 @@ package ru.peregruzochka.telegram_bot_backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,6 +16,7 @@ import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlotPattern;
 import ru.peregruzochka.telegram_bot_backend.service.GroupTimeSlotPatternService;
 
 import java.time.LocalTime;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -39,5 +41,12 @@ public class GroupTimeSlotPattenController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     void deleteTimeSlotPattern(@RequestParam("id") UUID id) {
         groupTimeSlotPatternService.deleteGroupTimeSlotPattern(id);
+    }
+
+    @GetMapping
+    List<GroupTimeSlotPatternDto> getPatternsByTeacherAndDay(@RequestParam("teacher-id") UUID teacherId,
+                                                             @RequestParam("day") DayOfWeek day) {
+        List<GroupTimeSlotPattern> patterns = groupTimeSlotPatternService.getPatternByTeacherAndDayOfWeek(teacherId, day);
+        return groupTimeSlotPatternMapper.toTimeSlotPatternDtoList(patterns);
     }
 }
