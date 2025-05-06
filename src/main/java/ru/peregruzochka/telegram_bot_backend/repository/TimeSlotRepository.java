@@ -44,4 +44,6 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, UUID> {
         order by t.startTime
         """)
     List<TimeSlot> getTeacherAllTimeSlots(Teacher teacher, LocalDateTime from, LocalDateTime to);
+
+    List<TimeSlot> findTimeSlotsByStartTimeBetween(LocalDateTime startTimeAfter, LocalDateTime startTimeBefore);
 }

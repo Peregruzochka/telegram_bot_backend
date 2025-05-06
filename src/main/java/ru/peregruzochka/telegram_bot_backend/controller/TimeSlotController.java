@@ -59,6 +59,13 @@ public class TimeSlotController {
         timeSlotService.fillByPatterns(from, to);
     }
 
+    @DeleteMapping("/clear")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void clearTimeSlots(@RequestParam("from") LocalDate from,
+                               @RequestParam("to") LocalDate to) {
+        timeSlotService.clear(from, to);
+    }
+
     @DeleteMapping("/{timeslot-id}")
     public void deleteTimeSlot(@PathVariable("timeslot-id") UUID timeslotId) {
         timeSlotService.removeTimeSlot(timeslotId);

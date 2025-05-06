@@ -57,4 +57,6 @@ public interface GroupTimeSlotRepository extends JpaRepository<GroupTimeSlot, UU
             order by t.startTime
             """)
     List<GroupTimeSlot> getAvailableByTeacherByLesson(Teacher teacher, GroupLesson lesson, LocalDateTime from, LocalDateTime to);
+
+    List<GroupTimeSlot> findTimeSlotsByStartTimeBetween(LocalDateTime fromTime, LocalDateTime toTime);
 }

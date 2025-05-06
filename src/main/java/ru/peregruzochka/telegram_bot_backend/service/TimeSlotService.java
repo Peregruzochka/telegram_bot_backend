@@ -20,7 +20,6 @@ import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -139,7 +138,36 @@ public class TimeSlotService {
 
     @Transactional
     public void clear(LocalDate from, LocalDate to) {
+        LocalDateTime fromTime = from.atStartOfDay();
+        LocalDateTime toTime = to.plusDays(1).atStartOfDay();
+        deleteIndividualSlots(fromTime, toTime);
+        deleteGroupSlots(fromTime, toTime);
+    }
 
+    private void deleteIndividualSlots(LocalDateTime fromTime, LocalDateTime toTime) {
+        List<TimeSlot> slots = timeSlotRepository.findTimeSlotsByStartTimeBetween(fromTime, toTime);
+        int count = 0;
+        for (TimeSlot slot : slots) {
+            if (!slot.getIsAvailable()) {
+                continue;
+            }
+            timeSlotRepository.delete(slot);
+            count++;
+        }
+        log.info("Deleted time slot {}", count);
+    }
+
+    private void deleteGroupSlots(LocalDateTime fromTime, LocalDateTime toTime) {
+        List<GroupTimeSlot> slots = groupTimeSlotRepository.findTimeSlotsByStartTimeBetween(fromTime, toTime);
+        int count = 0;
+        for (GroupTimeSlot slot : slots) {
+            if (!slot.getRegistrations().isEmpty()) {
+                continue;
+            }
+            groupTimeSlotRepository.delete(slot);
+            count++;
+        }
+        log.info("Deleted group time slot {}", count);
     }
 
     private void fillGroupSlots(LocalDate day) {
