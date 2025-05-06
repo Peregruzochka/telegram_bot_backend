@@ -60,4 +60,13 @@ public class TimeSlotPatternService {
             throw new IllegalArgumentException("Overlapping patterns found");
         }
     }
+
+    @Transactional
+    public void deleteTimeSlotPattern(UUID timeSlotPatternId) {
+        if (!timeSlotPatternRepository.existsById(timeSlotPatternId)) {
+            throw new IllegalArgumentException("TimeSlotPattern not found");
+        }
+        timeSlotPatternRepository.deleteById(timeSlotPatternId);
+        log.info("Deleted TimeSlotPattern: {}", timeSlotPatternId);
+    }
 }

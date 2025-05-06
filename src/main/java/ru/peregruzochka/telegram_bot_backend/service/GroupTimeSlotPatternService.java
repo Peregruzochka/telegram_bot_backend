@@ -54,6 +54,14 @@ public class GroupTimeSlotPatternService {
         return savedGroupTimeSlotPattern;
     }
 
+    @Transactional
+    public void deleteGroupTimeSlotPattern(UUID groupTimeSlotPatternId) {
+        if (!groupTimeSlotPatternRepository.existsById(groupTimeSlotPatternId)) {
+            throw new IllegalArgumentException("GroupTimeSlotPattern not found");
+        }
+        groupTimeSlotPatternRepository.deleteById(groupTimeSlotPatternId);
+        log.info("Deleted GroupTimeSlotPattern: {}", groupTimeSlotPatternId);
+    }
 
     private void checkTeacherLesson(Teacher teacher, GroupLesson lesson) {
         Set<UUID> lessonIds = teacher.getGroupLessons().stream()
@@ -64,4 +72,6 @@ public class GroupTimeSlotPatternService {
             throw new IllegalArgumentException("Lesson not for the teacher: " + teacher);
         }
     }
+
+
 }
