@@ -4,13 +4,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.peregruzochka.telegram_bot_backend.model.GroupLesson;
 import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlot;
+import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlotPattern;
 import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
+import ru.peregruzochka.telegram_bot_backend.model.TimeSlotPattern;
+import ru.peregruzochka.telegram_bot_backend.repository.GroupTimeSlotPatternRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.GroupTimeSlotRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
+import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotPatternRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotRepository;
 
+import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,6 +30,8 @@ public class TimeSlotService {
     private final TimeSlotRepository timeSlotRepository;
     private final TeacherRepository teacherRepository;
     private final GroupTimeSlotRepository groupTimeSlotRepository;
+    private final TimeSlotPatternRepository timeSlotPatternRepository;
+    private final GroupTimeSlotPatternRepository groupTimeSlotPatternRepository;
 
     @Transactional(readOnly = true)
     public List<TimeSlot> getTeacherAvailableTimeSlotsInNextMonth(UUID teacherId) {
@@ -116,6 +124,106 @@ public class TimeSlotService {
         );
         log.info("Get time slot {}", timeSlot);
         return timeSlot;
+    }
+
+    @Transactional
+    public void fillByPatterns(LocalDate from, LocalDate to) {
+        LocalDate day = from;
+        while (day.isBefore(to.plusDays(1))) {
+            fillIndividualSlots(day);
+            fillGroupSlots(day);
+            day = day.plusDays(1);
+        }
+    }
+
+    @Transactional
+    public void clear(LocalDate from, LocalDate to) {
+        LocalDateTime fromTime = from.atStartOfDay();
+        LocalDateTime toTime = to.plusDays(1).atStartOfDay();
+        deleteIndividualSlots(fromTime, toTime);
+        deleteGroupSlots(fromTime, toTime);
+    }
+
+    private void deleteIndividualSlots(LocalDateTime fromTime, LocalDateTime toTime) {
+        List<TimeSlot> slots = timeSlotRepository.findTimeSlotsByStartTimeBetween(fromTime, toTime);
+        int count = 0;
+        for (TimeSlot slot : slots) {
+            if (!slot.getIsAvailable()) {
+                continue;
+            }
+            timeSlotRepository.delete(slot);
+            count++;
+        }
+        log.info("Deleted time slot {}", count);
+    }
+
+    private void deleteGroupSlots(LocalDateTime fromTime, LocalDateTime toTime) {
+        List<GroupTimeSlot> slots = groupTimeSlotRepository.findTimeSlotsByStartTimeBetween(fromTime, toTime);
+        int count = 0;
+        for (GroupTimeSlot slot : slots) {
+            if (!slot.getRegistrations().isEmpty()) {
+                continue;
+            }
+            groupTimeSlotRepository.delete(slot);
+            count++;
+        }
+        log.info("Deleted group time slot {}", count);
+    }
+
+    private void fillGroupSlots(LocalDate day) {
+        DayOfWeek dayOfWeek = day.getDayOfWeek();
+        List<GroupTimeSlotPattern> groupPatternsByDay = groupTimeSlotPatternRepository.findByDayOfWeek(dayOfWeek);
+        int count = 0;
+        for (GroupTimeSlotPattern pattern : groupPatternsByDay) {
+            LocalDateTime slotStartTime = LocalDateTime.of(day, pattern.getStartTime());
+            LocalDateTime slotEndTime = LocalDateTime.of(day, pattern.getEndTime());
+            Teacher teacher = pattern.getTeacher();
+            if (countOverlapping(teacher, slotStartTime, slotEndTime) > 0) {
+                continue;
+            }
+            GroupLesson lesson = pattern.getGroupLesson();
+            GroupTimeSlot slot = GroupTimeSlot.builder()
+                    .teacher(teacher)
+                    .startTime(slotStartTime)
+                    .endTime(slotEndTime)
+                    .groupLesson(lesson)
+                    .build();
+
+            groupTimeSlotRepository.save(slot);
+            count++;
+        }
+        log.info("Fill group slots by day:{} -> {}", day, count);
+    }
+
+    private void fillIndividualSlots(LocalDate day) {
+        DayOfWeek dayOfWeek = day.getDayOfWeek();
+        List<TimeSlotPattern> patternsByDay = timeSlotPatternRepository.findByDayOfWeek(dayOfWeek);
+        int count = 0;
+        for (TimeSlotPattern pattern : patternsByDay) {
+            LocalDateTime slotStartTime = LocalDateTime.of(day, pattern.getStartTime());
+            LocalDateTime slotEndTime = LocalDateTime.of(day, pattern.getEndTime());
+            Teacher teacher = pattern.getTeacher();
+            if (countOverlapping(teacher, slotStartTime, slotEndTime) > 0) {
+                continue;
+            }
+
+            TimeSlot slot = TimeSlot.builder()
+                    .teacher(teacher)
+                    .startTime(slotStartTime)
+                    .endTime(slotEndTime)
+                    .isAvailable(true)
+                    .build();
+
+            timeSlotRepository.save(slot);
+            count++;
+        }
+        log.info("Fill individual slots by day:{} -> {}", day, count);
+    }
+
+    private int countOverlapping(Teacher teacher, LocalDateTime startTime, LocalDateTime endTime) {
+        int slotCount = timeSlotRepository.findOverlappingTimeSlots(teacher, startTime, endTime).size();
+        int groupCount = groupTimeSlotRepository.findOverlappingTimeSlots(teacher, startTime, endTime).size();
+        return slotCount + groupCount;
     }
 
     private void checkOverlapping(Teacher teacher, LocalDateTime start, LocalDateTime end) {
