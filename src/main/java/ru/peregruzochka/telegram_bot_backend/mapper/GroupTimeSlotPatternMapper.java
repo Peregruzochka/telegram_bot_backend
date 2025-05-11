@@ -16,7 +16,7 @@ public class GroupTimeSlotPatternMapper {
                 .endTime(timeSlotPattern.getEndTime())
                 .dayOfWeek(timeSlotPattern.getDayOfWeek())
                 .teacherId(timeSlotPattern.getTeacher().getId())
-                .lessonId(timeSlotPattern.getGroupLesson().getId())
+                .lessonName(timeSlotPattern.getGroupLesson().getName())
                 .build();
     }
 

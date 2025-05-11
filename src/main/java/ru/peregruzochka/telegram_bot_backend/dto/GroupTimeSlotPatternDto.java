@@ -23,5 +23,5 @@ public class GroupTimeSlotPatternDto {
     private LocalTime startTime;
     private LocalTime endTime;
     private UUID teacherId;
-    private UUID lessonId;
+    private String lessonName;
 }
