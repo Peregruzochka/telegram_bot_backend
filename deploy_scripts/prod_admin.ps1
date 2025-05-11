@@ -3,7 +3,7 @@ $path_to_docker_compose_dir = "C:\Users\Peregruzochka\Documents\GitHub\telegram_
 $service_name = "admin"
 $compose_file = "docker-compose.prod.yaml"
 
-git -C $path_to_service_name_dir pull origin master
+git -C $path_to_service_name_dir pull origin dev
 
 cd $path_to_docker_compose_dir
 docker-compose -f "$compose_file" build $service_name

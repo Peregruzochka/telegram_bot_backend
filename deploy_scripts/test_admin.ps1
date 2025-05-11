@@ -4,7 +4,7 @@ $service_name = "admin-test"
 $compose_file = "docker-compose.test.yaml"
 $project_name = "test-space"
 
-git -C $path_to_service_name_dir pull origin master
+git -C $path_to_service_name_dir pull origin dev
 
 cd $path_to_docker_compose_dir
 docker compose -f "$compose_file" --project-name $project_name build $service_name
