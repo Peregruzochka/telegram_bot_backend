@@ -35,3 +35,5 @@ databaseChangeLog:
       file: db/changelog/changeset/v017_group_lessons_teachers.sql
   - include:
       file: db/changelog/changeset/v018_group_registrations_drop_type.sql
+  - include:
+      file: db/changelog/changeset/v019_timeslot_pattern_init.sql
