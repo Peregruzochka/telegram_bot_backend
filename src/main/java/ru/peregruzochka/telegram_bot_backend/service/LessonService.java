@@ -64,4 +64,15 @@ public class LessonService {
         log.info("Lesson {} added to teacher {}", savedLesson, teacher);
         return savedLesson;
     }
+
+    @Transactional(readOnly = true)
+    public List<Lesson> getLessonsByTeacher(UUID teacherId) {
+        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found")
+        );
+
+        List<Lesson> lessons = lessonRepository.findAllByTeacher(teacher);
+        log.info("Get lessons by teacher: {}", lessons.size());
+        return lessons;
+    }
 }

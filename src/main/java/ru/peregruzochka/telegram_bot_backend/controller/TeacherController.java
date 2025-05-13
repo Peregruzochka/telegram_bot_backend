@@ -3,6 +3,7 @@ package ru.peregruzochka.telegram_bot_backend.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,6 +17,7 @@ import ru.peregruzochka.telegram_bot_backend.model.Image;
 import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.service.TeacherService;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -59,5 +61,17 @@ public class TeacherController {
     public List<TeacherDto> getTeachersByGroupLesson(@RequestParam UUID lessonId) {
         List<Teacher> teachers = teacherService.getTeachersByGroupLessonId(lessonId);
         return teacherMapper.toTeacherDtoList(teachers);
+    }
+
+    @GetMapping("/by-slot-date")
+    public List<TeacherDto> getTeachersBySlotDate(@RequestParam LocalDate slotDate) {
+        List<Teacher> teachers = teacherService.getTeachersBySlotDate(slotDate);
+        return teacherMapper.toTeacherDtoList(teachers);
+    }
+
+    @GetMapping("/{id}")
+    public TeacherDto getTeacherById(@PathVariable UUID id) {
+        Teacher teacher = teacherService.getById(id);
+        return teacherMapper.toTeacherDto(teacher);
     }
 }
