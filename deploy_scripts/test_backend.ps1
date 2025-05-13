@@ -5,6 +5,7 @@ $compose_file = "docker-compose.test.yaml"
 $project_name = "test-space"
 
 git -C $path_to_service_name_dir pull origin master
+Read-Host "Enter"
 
 cd $path_to_docker_compose_dir
 docker compose -f "$compose_file" --project-name $project_name build $service_name
@@ -12,3 +13,4 @@ docker compose -f "$compose_file" --project-name $project_name stop $service_nam
 docker compose -f "$compose_file" --project-name $project_name rm -f $service_name
 docker compose -f "$compose_file" --project-name $project_name up -d --no-deps $service_name
 docker image prune -f
+Read-Host "Enter"
