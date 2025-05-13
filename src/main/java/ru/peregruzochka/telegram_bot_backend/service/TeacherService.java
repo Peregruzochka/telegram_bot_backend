@@ -83,7 +83,7 @@ public class TeacherService {
         LocalDateTime to = from.plusDays(1);
         Set<Teacher> teachers = teacherRepository.findByTimeSlotDate(from, to);
         Set<Teacher> groupTeachers = teacherRepository.findByGroupTimeSlotDate(from, to);
-        teachers.containsAll(groupTeachers);
+        teachers.addAll(groupTeachers);
         log.info("Teachers by slot date [{}] found: {}", slotDate, teachers.size());
         return teachers.stream().toList();
     }
