@@ -17,7 +17,6 @@ import ru.peregruzochka.telegram_bot_backend.mapper.LessonMapper;
 import ru.peregruzochka.telegram_bot_backend.model.Lesson;
 import ru.peregruzochka.telegram_bot_backend.service.LessonService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,6 +38,12 @@ public class LessonController {
     public LessonDto getLesson(@PathVariable("lesson-id") UUID id) {
         Lesson lesson = lessonService.getLesson(id);
         return lessonMapper.toLessonDto(lesson);
+    }
+
+    @GetMapping("/by-teacher")
+    public List<LessonDto> getLessonsByTeacher(@RequestParam("teacher-id") UUID teacherId) {
+        List<Lesson> lessons = lessonService.getLessonsByTeacher(teacherId);
+        return lessonMapper.toLessonDtoList(lessons);
     }
 
     @PostMapping
