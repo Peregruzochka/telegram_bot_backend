@@ -60,11 +60,11 @@ public class Teacher {
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "teachers")
+    @OneToMany(mappedBy = "teacher")
     private List<TimeSlot> timeSlots;
 
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    @OneToMany(mappedBy = "teachers")
+    @OneToMany(mappedBy = "teacher")
     private List<GroupTimeSlot> groupTimeSlots;
 }

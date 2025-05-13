@@ -43,7 +43,7 @@ public interface TeacherRepository extends JpaRepository<Teacher, UUID> {
 
     @Query("""
             select distinct gts.teacher from GroupTimeSlot gts
-            where gts.registrations.size < gts.groupLesson.groupSize
+            where size(gts.registrations) < gts.groupLesson.groupSize
             and gts.startTime >= :from and gts.startTime <= :to
             """)
     Set<Teacher> findByGroupTimeSlotDate(LocalDateTime from, LocalDateTime to);

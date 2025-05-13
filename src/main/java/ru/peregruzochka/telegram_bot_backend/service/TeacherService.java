@@ -87,4 +87,13 @@ public class TeacherService {
         log.info("Teachers by slot date [{}] found: {}", slotDate, teachers.size());
         return teachers.stream().toList();
     }
+
+    @Transactional(readOnly = true)
+    public Teacher getById(UUID id) {
+        Teacher teacher = teacherRepository.findById(id).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found: " + id)
+        );
+        log.info("Teacher found: {}", teacher);
+        return teacher;
+    }
 }
