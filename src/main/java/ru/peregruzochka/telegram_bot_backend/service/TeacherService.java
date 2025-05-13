@@ -13,7 +13,10 @@ import ru.peregruzochka.telegram_bot_backend.repository.ImageRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.LessonRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -72,5 +75,16 @@ public class TeacherService {
         List<Teacher> teachers = teacherRepository.findTeachersByGroupLesson(groupLesson);
         log.info("Teachers with group lesson {} found: {}", lessonId, teachers.size());
         return teachers;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Teacher> getTeachersBySlotDate(LocalDate slotDate) {
+        LocalDateTime from = slotDate.atStartOfDay();
+        LocalDateTime to = from.plusDays(1);
+        Set<Teacher> teachers = teacherRepository.findByTimeSlotDate(from, to);
+        Set<Teacher> groupTeachers = teacherRepository.findByGroupTimeSlotDate(from, to);
+        teachers.containsAll(groupTeachers);
+        log.info("Teachers by slot date [{}] found: {}", slotDate, teachers.size());
+        return teachers.stream().toList();
     }
 }
