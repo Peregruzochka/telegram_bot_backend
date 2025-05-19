@@ -20,6 +20,7 @@ public class GroupRegistrationEvent {
     private UUID registrationId;
     private Long telegramId;
     private String username;
+    private String phoneNumber;
     private String userStatus;
     private String childName;
     private String childBirthday;
