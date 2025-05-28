@@ -80,5 +80,16 @@ public interface GroupRegistrationRepository extends JpaRepository<GroupRegistra
             """)
     List<GroupRegistration> findAutoConfirmedBetween(LocalDateTime start, LocalDateTime end);
 
-    Boolean existsGroupRegistrationByChildAndGroupTimeslot_StartTime(Child child, LocalDateTime time);
+    @Query("""
+            select r from GroupRegistration r
+            where r.child = :child
+            and (
+                :from < r.groupTimeslot.startTime and :to > r.groupTimeslot.startTime and :from < r.groupTimeslot.endTime and :to < r.groupTimeslot.endTime
+                or
+                :from = r.groupTimeslot.startTime and :to > r.groupTimeslot.startTime and :from < r.groupTimeslot.endTime and :to = r.groupTimeslot.endTime
+                or
+                :from > r.groupTimeslot.startTime and :to > r.groupTimeslot.startTime and :from < r.groupTimeslot.endTime and :to > r.groupTimeslot.endTime
+            )
+            """)
+    List<GroupRegistration> findOverlappingByChild(Child child, LocalDateTime from, LocalDateTime to);
 }

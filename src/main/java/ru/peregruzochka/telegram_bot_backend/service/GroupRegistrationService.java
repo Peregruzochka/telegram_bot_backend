@@ -11,13 +11,13 @@ import ru.peregruzochka.telegram_bot_backend.model.ChildStatus;
 import ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus;
 import ru.peregruzochka.telegram_bot_backend.model.GroupRegistration;
 import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlot;
+import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.model.User;
 import ru.peregruzochka.telegram_bot_backend.model.UserStatus;
 import ru.peregruzochka.telegram_bot_backend.redis.ConfirmGroupRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.redis.LocalCancelPublisher;
 import ru.peregruzochka.telegram_bot_backend.redis.NewGroupRegistrationEventPublisher;
-import ru.peregruzochka.telegram_bot_backend.redis.NotConfirmedGroupRegistrationEventPublisher;
 import ru.peregruzochka.telegram_bot_backend.repository.ChildRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.GroupRegistrationRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.GroupTimeSlotRepository;
@@ -318,9 +318,10 @@ public class GroupRegistrationService {
         );
 
         LocalDateTime startTime = groupRegistration.getGroupTimeslot().getStartTime();
-        if (registrationRepository.existsByChildAndTimeslot_StartTime(child, startTime) ||
-                groupRegistrationRepository.existsGroupRegistrationByChildAndGroupTimeslot_StartTime(child, startTime)
-        ) {
+        LocalDateTime endTime = groupRegistration.getGroupTimeslot().getEndTime();
+        List<Registration> registrations = registrationRepository.findOverlappingByChild(child, startTime, endTime);
+        List<GroupRegistration> groupRegistrations = groupRegistrationRepository.findOverlappingByChild(child, startTime, endTime);
+        if (!registrations.isEmpty() || !groupRegistrations.isEmpty()) {
             throw new IllegalArgumentException("Registration already exists for the child: " + child);
         }
     }

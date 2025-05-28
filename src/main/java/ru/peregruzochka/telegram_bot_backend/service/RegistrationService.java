@@ -9,6 +9,7 @@ import ru.peregruzochka.telegram_bot_backend.dto.LocalCancelEvent;
 import ru.peregruzochka.telegram_bot_backend.model.Child;
 import ru.peregruzochka.telegram_bot_backend.model.ChildStatus;
 import ru.peregruzochka.telegram_bot_backend.model.ConfirmStatus;
+import ru.peregruzochka.telegram_bot_backend.model.GroupRegistration;
 import ru.peregruzochka.telegram_bot_backend.model.Lesson;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.model.Teacher;
@@ -335,9 +336,10 @@ public class RegistrationService {
         );
 
         LocalDateTime startTime = registration.getTimeslot().getStartTime();
-        if (registrationRepository.existsByChildAndTimeslot_StartTime(child, startTime) ||
-                groupRegistrationRepository.existsGroupRegistrationByChildAndGroupTimeslot_StartTime(child, startTime)
-        ) {
+        LocalDateTime endTime = registration.getTimeslot().getEndTime();
+        List<Registration> registrations = registrationRepository.findOverlappingByChild(child, startTime, endTime);
+        List<GroupRegistration> groupRegistrations = groupRegistrationRepository.findOverlappingByChild(child, startTime, endTime);
+        if (!registrations.isEmpty() || !groupRegistrations.isEmpty()) {
             throw new IllegalArgumentException("Registration already exists for the child: " + child);
         }
     }
