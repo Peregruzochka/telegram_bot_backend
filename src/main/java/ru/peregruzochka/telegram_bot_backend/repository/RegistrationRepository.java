@@ -3,12 +3,14 @@ package ru.peregruzochka.telegram_bot_backend.repository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import ru.peregruzochka.telegram_bot_backend.model.Child;
 import ru.peregruzochka.telegram_bot_backend.model.Registration;
 import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.model.User;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -87,6 +89,9 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
             and r.confirmStatus = "AUTO_CONFIRMED"
             """)
     List<Registration> findAutoConfirmedBetween(LocalDateTime start, LocalDateTime end);
+
+    boolean existsByChildAndTimeslot_StartTime(Child child, LocalDateTime startTime);
+
 
 
 }

@@ -21,6 +21,7 @@ import ru.peregruzochka.telegram_bot_backend.redis.NotConfirmedGroupRegistration
 import ru.peregruzochka.telegram_bot_backend.repository.ChildRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.GroupRegistrationRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.GroupTimeSlotRepository;
+import ru.peregruzochka.telegram_bot_backend.repository.RegistrationRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.UserRepository;
 
@@ -53,6 +54,7 @@ public class GroupRegistrationService {
     private final TeacherRepository teacherRepository;
     private final ConfirmGroupRegistrationEventPublisher confirmGroupRegistrationEventPublisher;
     private final LocalCancelPublisher localCancelPublisher;
+    private final RegistrationRepository registrationRepository;
 
     @Value("${approve-delay.first-approve}")
     private int firstApproveDelay;
@@ -75,7 +77,7 @@ public class GroupRegistrationService {
         User dbUser = computeUser(user);
 
         Child child = groupRegistration.getChild();
-        computeChild(child, dbUser);
+        computeChild(child, dbUser, groupRegistration);
         checkChildUniqInTimeSlot(groupTimeSlot, child);
 
         groupRegistration.setUser(dbUser);
@@ -290,17 +292,17 @@ public class GroupRegistrationService {
         );
     }
 
-    private void computeChild(Child child, User user) {
+    private void computeChild(Child child, User user, GroupRegistration registration) {
         switch (child.getStatus()) {
             case NEW -> {
                 child.setParent(user);
                 user.getChildren().add(child);
                 childRepository.save(child);
             }
-            case REGULAR -> checkChild(child);
+            case REGULAR -> checkChild(child, registration);
 
             case EDITING -> {
-                checkChild(child);
+                checkChild(child, registration);
                 Child editingChild = childRepository.findById(child.getId()).orElseThrow();
                 editingChild.setChildName(child.getChildName());
                 editingChild.setBirthday(child.getBirthday());
@@ -310,12 +312,17 @@ public class GroupRegistrationService {
         }
     }
 
-    private void checkChild(Child child) {
+    private void checkChild(Child child, GroupRegistration groupRegistration) {
         childRepository.findById(child.getId()).orElseThrow(
                 () -> new IllegalArgumentException("Child not found: " + child.getId())
         );
 
-
+        LocalDateTime startTime = groupRegistration.getGroupTimeslot().getStartTime();
+        if (registrationRepository.existsByChildAndTimeslot_StartTime(child, startTime) ||
+                groupRegistrationRepository.existsGroupRegistrationByChildAndGroupTimeslot_StartTime(child, startTime)
+        ) {
+            throw new IllegalArgumentException("Registration already exists for the child: " + child);
+        }
     }
 
     private ConfirmStatus chooseConfirmStatus(GroupRegistration registration) {
