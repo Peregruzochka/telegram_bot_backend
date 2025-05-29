@@ -1,5 +1,6 @@
 package ru.peregruzochka.telegram_bot_backend.handler;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -21,6 +23,8 @@ public class GlobalExceptionHandler {
         errorDetails.put("message", ex.getMessage());
         errorDetails.put("exception", ex.getClass().getName());
         errorDetails.put("path", "/registrations");
+
+        log.error(ex.getMessage(), ex);
 
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }

@@ -106,8 +106,8 @@ public interface RegistrationRepository extends JpaRepository<Registration, UUID
             select r from Registration r
             where r.child = :child
             and r.timeslot.teacher = :teacher
-            and r.timeslot.startTime <= :from
             and r.timeslot.startTime <= :to
+            and r.timeslot.startTime >= :from
             """)
     List<Registration> findByChildAndTeacherBetweenTimes(Child child, Teacher teacher, LocalDateTime from, LocalDateTime to);
 }
