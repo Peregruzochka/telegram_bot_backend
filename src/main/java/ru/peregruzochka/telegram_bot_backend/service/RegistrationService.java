@@ -334,12 +334,26 @@ public class RegistrationService {
         childRepository.findById(child.getId()).orElseThrow(
                 () -> new IllegalArgumentException("Child not found: " + child.getId())
         );
+        checkOverlappingByChild(child, registration);
+        checkTeacherRegistrationToday(child, registration);
+    }
 
+    private void checkTeacherRegistrationToday(Child child, Registration registration) {
+        Teacher teacher = registration.getTimeslot().getTeacher();
+        LocalDateTime startDay = registration.getTimeslot().getStartTime().toLocalDate().atStartOfDay();
+        LocalDateTime endDay = startDay.plusDays(1);
+        List<Registration> registrationsCheckTwo = registrationRepository.findByChildAndTeacherBetweenTimes(child, teacher, startDay, endDay);
+        if (!registrationsCheckTwo.isEmpty()) {
+            throw new IllegalArgumentException("Registration already exists today for the teacher: " + teacher);
+        }
+    }
+
+    private void checkOverlappingByChild(Child child, Registration registration) {
         LocalDateTime startTime = registration.getTimeslot().getStartTime();
         LocalDateTime endTime = registration.getTimeslot().getEndTime();
-        List<Registration> registrations = registrationRepository.findOverlappingByChild(child, startTime, endTime);
+        List<Registration> registrationsCheckOne = registrationRepository.findOverlappingByChild(child, startTime, endTime);
         List<GroupRegistration> groupRegistrations = groupRegistrationRepository.findOverlappingByChild(child, startTime, endTime);
-        if (!registrations.isEmpty() || !groupRegistrations.isEmpty()) {
+        if (!registrationsCheckOne.isEmpty() || !groupRegistrations.isEmpty()) {
             throw new IllegalArgumentException("Registration already exists for the child: " + child);
         }
     }
