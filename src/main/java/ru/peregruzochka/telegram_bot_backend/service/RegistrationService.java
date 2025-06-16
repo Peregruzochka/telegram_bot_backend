@@ -220,6 +220,9 @@ public class RegistrationService {
             log.info("Confirm registration: {}", registration);
             confirmRegistrationEventPublisher.publish(registration);
             return registrationRepository.save(registration);
+        } else if (registration.getConfirmStatus() == USER_CANCELLED
+                || registration.getConfirmStatus() == AUTO_CANCELLED) {
+            throw new IllegalArgumentException("Incorrect confirm");
         } else {
             return registration;
         }
@@ -250,6 +253,10 @@ public class RegistrationService {
 
             localCancelPublisher.publish(localCancelEvent);
             return registrationRepository.save(registration);
+        } else if (registration.getConfirmStatus() == CONFIRMED
+                || registration.getConfirmStatus() == AUTO_CONFIRMED
+                || registration.getConfirmStatus() == AUTO_CONFIRMED_QR) {
+            throw new IllegalArgumentException("Incorrect decline");
         } else {
             return registration;
         }
@@ -378,6 +385,4 @@ public class RegistrationService {
             throw new IllegalArgumentException("TimeSlot is not available");
         }
     }
-
-
 }

@@ -213,6 +213,9 @@ public class GroupRegistrationService {
             log.info("Confirm group registration: {}", groupRegistration);
             confirmGroupRegistrationEventPublisher.publish(groupRegistration);
             return groupRegistrationRepository.save(groupRegistration);
+        } else if (groupRegistration.getConfirmStatus() == USER_CANCELLED
+                || groupRegistration.getConfirmStatus() == AUTO_CANCELLED) {
+            throw new IllegalArgumentException("Incorrect confirm");
         } else {
             return groupRegistration;
         }
@@ -235,6 +238,10 @@ public class GroupRegistrationService {
 
             localCancelPublisher.publish(cancelEvent);
             return groupRegistrationRepository.save(groupRegistration);
+        } else if (groupRegistration.getConfirmStatus() == CONFIRMED
+                || groupRegistration.getConfirmStatus() == AUTO_CONFIRMED
+                || groupRegistration.getConfirmStatus() == AUTO_CONFIRMED_QR) {
+            throw new IllegalArgumentException("Incorrect decline");
         } else {
             return groupRegistration;
         }
