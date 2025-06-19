@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ru.peregruzochka.telegram_bot_backend.dto.BroadcastCreateDto;
 import ru.peregruzochka.telegram_bot_backend.dto.BroadcastDto;
-import ru.peregruzochka.telegram_bot_backend.dto.BroadcastStatisticsDto;
 import ru.peregruzochka.telegram_bot_backend.mapper.BroadcastMapper;
 import ru.peregruzochka.telegram_bot_backend.model.Broadcast;
 import ru.peregruzochka.telegram_bot_backend.service.BroadcastService;
@@ -32,16 +31,16 @@ public class BroadcastController {
         return broadcastMapper.toDto(newBroadcast);
     }
 
-
     @GetMapping("/{broadcastId}")
-    public BroadcastStatisticsDto getBroadcast(@PathVariable UUID broadcastId) {
-        return null;
+    public BroadcastDto getBroadcast(@PathVariable UUID broadcastId) {
+        Broadcast broadcast = broadcastService.getBroadcast(broadcastId);
+        return broadcastMapper.toDto(broadcast);
     }
 
     @GetMapping("/history")
     public List<Broadcast> getBroadcastHistory(@RequestParam(value = "telegram_id", required = false) String telegramId,
                                                @RequestParam(defaultValue = "0") int page,
-                                               @RequestParam(defaultValue = "20") int size) {
+                                               @RequestParam(defaultValue = "5") int size) {
         return null;
     }
 }

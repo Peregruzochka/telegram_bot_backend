@@ -46,4 +46,10 @@ public class BroadcastService {
 
         return createdBroadcast;
     }
+
+    @Transactional(readOnly = true)
+    public Broadcast getBroadcast(UUID broadcastId) {
+        return broadcastRepository.findById(broadcastId)
+                .orElseThrow(() -> new IllegalArgumentException("Broadcast not found"));
+    }
 }
