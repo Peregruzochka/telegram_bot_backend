@@ -1,0 +1,2 @@
+ALTER TABLE teachers
+ADD COLUMN telegram_id BIGINT NOT NULL DEFAULT 0;

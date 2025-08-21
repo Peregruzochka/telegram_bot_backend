@@ -41,6 +41,9 @@ public class Teacher {
     @EqualsAndHashCode.Include
     private String name;
 
+    @Column(nullable = false)
+    private Long telegramId;
+
     @OneToOne
     @JoinColumn(name = "image_id", nullable = false)
     private Image image;
