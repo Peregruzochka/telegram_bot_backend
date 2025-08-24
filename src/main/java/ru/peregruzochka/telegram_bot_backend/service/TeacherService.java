@@ -96,4 +96,17 @@ public class TeacherService {
         log.info("Teacher found: {}", teacher);
         return teacher;
     }
+
+    @Transactional
+    public Teacher updateTeacherPhoto(UUID teacherId, Image image) {
+        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found: " + teacherId)
+        );
+
+        Image savedImage = imageRepository.save(image);
+        teacher.setImage(savedImage);
+        teacherRepository.save(teacher);
+        log.info("Teacher image updated: {}", teacher);
+        return teacher;
+    }
 }

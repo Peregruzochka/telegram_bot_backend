@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -38,11 +39,14 @@ public class TeacherController {
         return teacherMapper.toTeacherDto(teacher);
     }
 
-    @GetMapping
+
+    @PutMapping("/{teacher-id}/update-photo")
     @ResponseStatus(HttpStatus.OK)
-    public List<TeacherDto> getAllTeachers() {
-        List<Teacher> teachers = teacherService.getAllTeachers();
-        return teacherMapper.toTeacherDtoList(teachers);
+    public TeacherDto updateTeacherPhoto(@PathVariable("teacher-id") UUID teacherId,
+                                         @RequestParam MultipartFile file) {
+        Image image = imageMapper.toImageEntity(file);
+        Teacher teacher = teacherService.updateTeacherPhoto(teacherId, image);
+        return teacherMapper.toTeacherDto(teacher);
     }
 
     @GetMapping("/group-teachers")
