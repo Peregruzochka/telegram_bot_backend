@@ -49,6 +49,13 @@ public class TeacherController {
         return teacherMapper.toTeacherDto(teacher);
     }
 
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<TeacherDto> getAllTeachers() {
+        List<Teacher> teachers = teacherService.getAllTeachers();
+        return teacherMapper.toTeacherDtoList(teachers);
+    }
+
     @GetMapping("/group-teachers")
     public List<TeacherDto> getGroupTeacher() {
         List<Teacher> teachers = teacherService.getGroupTeachers();
