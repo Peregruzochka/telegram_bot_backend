@@ -15,6 +15,7 @@ public class TeacherMapper {
                 .name(teacher.getName())
                 .imageID(teacher.getImage().getId())
                 .hidden(teacher.isHidden())
+                .telegramId(teacher.getTelegramId())
                 .build();
     }
 
@@ -31,6 +32,7 @@ public class TeacherMapper {
         return Teacher.builder()
                 .id(teacherDto.getId())
                 .name(teacherDto.getName())
+                .telegramId(teacherDto.getTelegramId())
                 .build();
     }
 }

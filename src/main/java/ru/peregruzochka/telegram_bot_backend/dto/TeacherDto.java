@@ -18,4 +18,5 @@ public class TeacherDto {
     private String name;
     private UUID imageID;
     private boolean hidden;
+    private Long telegramId;
 }

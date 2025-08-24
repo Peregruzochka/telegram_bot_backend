@@ -96,4 +96,17 @@ public class TeacherService {
         log.info("Teacher found: {}", teacher);
         return teacher;
     }
+
+    @Transactional(readOnly = true)
+    public Teacher getTeacherByTelegramId(Long telegramId) {
+        if (telegramId == null) {
+            throw new IllegalArgumentException("Telegram id is null");
+        }
+
+        Teacher teacher = teacherRepository.findTeachersByTelegramId(telegramId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found: " + telegramId)
+        );
+        log.info("Teacher found by telegram-id: {}", teacher);
+        return teacher;
+    }
 }

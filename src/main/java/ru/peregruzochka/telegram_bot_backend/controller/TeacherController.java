@@ -74,4 +74,10 @@ public class TeacherController {
         Teacher teacher = teacherService.getById(id);
         return teacherMapper.toTeacherDto(teacher);
     }
+
+    @GetMapping("/by-telegram-id/{telegram-id}")
+    public TeacherDto getTeacherByTelegramId(@PathVariable("telegram-id") Long telegramId) {
+        Teacher teacher = teacherService.getTeacherByTelegramId(telegramId);
+        return teacherMapper.toTeacherDto(teacher);
+    }
 }

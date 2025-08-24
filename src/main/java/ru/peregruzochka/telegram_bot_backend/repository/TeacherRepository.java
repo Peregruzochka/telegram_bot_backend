@@ -9,6 +9,7 @@ import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -47,4 +48,7 @@ public interface TeacherRepository extends JpaRepository<Teacher, UUID> {
             and gts.startTime >= :from and gts.startTime <= :to
             """)
     Set<Teacher> findByGroupTimeSlotDate(LocalDateTime from, LocalDateTime to);
+
+
+    Optional<Teacher> findTeachersByTelegramId(Long telegramId);
 }
