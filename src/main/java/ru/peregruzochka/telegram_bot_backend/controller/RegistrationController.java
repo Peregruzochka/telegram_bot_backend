@@ -67,6 +67,13 @@ public class RegistrationController {
         return registrationMapper.toRegistrationDtoList(registrations);
     }
 
+    @GetMapping("/search-actual-by-teacher-by-week")
+    public List<RegistrationDto> getAllActualRegistrationsByTeacherByDate(@RequestParam("teacher-id") UUID teacherId,
+                                                                          @RequestParam("week-offset") int weekOffset) {
+        List<Registration> registrations = registrationService.getAllActualRegistrationByTeacherByWeek(teacherId, weekOffset);
+        return registrationMapper.toRegistrationDtoList(registrations);
+    }
+
     @GetMapping("/search-by-date")
     public List<RegistrationDto> getAllRegistrationsByDate(@RequestParam("date") LocalDate date) {
         List<Registration> registrations = registrationService.getAllRegistrationByDate(date);

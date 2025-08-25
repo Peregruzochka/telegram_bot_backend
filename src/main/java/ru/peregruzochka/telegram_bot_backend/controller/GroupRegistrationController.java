@@ -58,6 +58,13 @@ public class GroupRegistrationController {
         return groupRegistrationMapper.toGroupRegistrationDtoList(registrations);
     }
 
+    @GetMapping("/search-actual-by-teacher-by-week")
+    public List<GroupRegistrationDto> getAllActualGroupRegistrationsByTeacherByWeek(@RequestParam("teacher-id") UUID teacherId,
+                                                                                    @RequestParam("week-offset") int weekOffset) {
+        List<GroupRegistration> registrations = groupRegistrationService.getAllActualRegistrationByTeacherByWeek(teacherId, weekOffset);
+        return groupRegistrationMapper.toGroupRegistrationDtoList(registrations);
+    }
+
     @PutMapping("/{registration-id}/confirm")
     public GroupRegistrationDto confirmGroupRegistration(@PathVariable("registration-id") UUID registrationId) {
         GroupRegistration registration = groupRegistrationService.confirm(registrationId);

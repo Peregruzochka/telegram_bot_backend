@@ -25,6 +25,7 @@ import ru.peregruzochka.telegram_bot_backend.repository.RegistrationRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.UserRepository;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -245,6 +246,23 @@ public class GroupRegistrationService {
         } else {
             return groupRegistration;
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<GroupRegistration> getAllActualRegistrationByTeacherByWeek(UUID teacherId, int weekOffset) {
+        LocalDate today = LocalDate.now();
+        LocalDate monday = today.with(DayOfWeek.MONDAY).plusWeeks(weekOffset);
+        LocalDate nextMonday = monday.plusDays(7);
+        LocalDateTime start = monday.atStartOfDay();
+        LocalDateTime end = nextMonday.atStartOfDay();
+
+        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found")
+        );
+
+        List<GroupRegistration> registrations = groupRegistrationRepository.findAllActualByTeacherByDate(teacher, start, end);
+        log.info("All group-registrations by teacher[{}] by week [offset={}] found: {}", teacher, weekOffset, registrations.size());
+        return registrations;
     }
 
     private void checkChildUniqInTimeSlot(GroupTimeSlot groupTimeSlot, Child child) {

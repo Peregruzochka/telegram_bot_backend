@@ -27,6 +27,7 @@ import ru.peregruzochka.telegram_bot_backend.repository.TeacherRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotRepository;
 import ru.peregruzochka.telegram_bot_backend.repository.UserRepository;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -285,6 +286,23 @@ public class RegistrationService {
         return registrations;
     }
 
+    @Transactional(readOnly = true)
+    public List<Registration> getAllActualRegistrationByTeacherByWeek(UUID teacherId, int weekOffset) {
+        LocalDate today = LocalDate.now();
+        LocalDate monday = today.with(DayOfWeek.MONDAY).plusWeeks(weekOffset);
+        LocalDate nextMonday = monday.plusDays(7);
+        LocalDateTime start = monday.atStartOfDay();
+        LocalDateTime end = nextMonday.atStartOfDay();
+
+        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found")
+        );
+
+        List<Registration> registrations = registrationRepository.findAllActualByTeacherByDate(teacher, start, end);
+        log.info("All registrations by teacher[{}] by week [offset={}] found: {}", teacher, weekOffset, registrations.size());
+        return registrations;
+    }
+
 
     private void computeChild(Child child, User user, Registration registration) {
         switch (child.getStatus()) {
@@ -308,7 +326,7 @@ public class RegistrationService {
 
     private User computeUser(User user) {
         return switch (user.getStatus()) {
-            case NEW-> {
+            case NEW -> {
                 user.setChildren(new ArrayList<>());
                 yield userRepository.save(user);
             }
@@ -332,7 +350,7 @@ public class RegistrationService {
         LocalDateTime startTime = registration.getTimeslot().getStartTime();
         if (LocalDateTime.now().plusDays(1).isAfter(startTime)) {
             return AUTO_CONFIRMED;
-        } else  {
+        } else {
             return NOT_CONFIRMED;
         }
     }
@@ -385,4 +403,6 @@ public class RegistrationService {
             throw new IllegalArgumentException("TimeSlot is not available");
         }
     }
+
+
 }
