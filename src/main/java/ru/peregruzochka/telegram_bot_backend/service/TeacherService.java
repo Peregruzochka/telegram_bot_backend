@@ -35,6 +35,7 @@ public class TeacherService {
                 .name(name)
                 .image(savedImage)
                 .hidden(false)
+                .telegramId(0L)
                 .build();
         Teacher savedTeacher = teacherRepository.save(teacher);
         log.info("Teacher added: {}", savedTeacher);
