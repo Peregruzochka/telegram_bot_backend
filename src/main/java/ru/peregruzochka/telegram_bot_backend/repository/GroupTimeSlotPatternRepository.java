@@ -16,8 +16,7 @@ public interface GroupTimeSlotPatternRepository extends JpaRepository<GroupTimeS
 
     @Query("""
             select t from GroupTimeSlotPattern t
-            where t.teacher = :teacher
-            and t.dayOfWeek = :day
+            where t.dayOfWeek = :day
             and (
                      :from < t.startTime and :to > t.startTime and :from < t.endTime and :to < t.endTime
                      or
@@ -26,7 +25,7 @@ public interface GroupTimeSlotPatternRepository extends JpaRepository<GroupTimeS
                      :from > t.startTime and :to > t.startTime and :from < t.endTime and :to > t.endTime
                  )
             """)
-    List<GroupTimeSlotPattern> findOverLappingPatterns(Teacher teacher, DayOfWeek day, LocalTime from, LocalTime to);
+    List<GroupTimeSlotPattern> findOverLappingPatterns(DayOfWeek day, LocalTime from, LocalTime to);
 
     @Query("""
             select t from GroupTimeSlotPattern t

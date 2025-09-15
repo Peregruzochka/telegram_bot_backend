@@ -13,6 +13,7 @@ import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotPatternRepositor
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -47,17 +48,21 @@ public class TimeSlotPatternService {
     @Transactional(readOnly = true)
     public void checkPatternOverlapping(DayOfWeek dayOfWeek, LocalTime startTime, Teacher teacher) {
         LocalTime endTime = startTime.plusMinutes(45);
-
-        List<TimeSlotPattern> overlapping = timeSlotPatternRepository
-                .findOverLappingPatterns(teacher, dayOfWeek, startTime, endTime);
-        if (!overlapping.isEmpty()) {
-            throw new IllegalArgumentException("Overlapping patterns found");
+        List<TimeSlotPattern> overlapping = timeSlotPatternRepository.findOverLappingPatterns(dayOfWeek, startTime, endTime);
+        List<GroupTimeSlotPattern> groupOverlapping = groupTimeSlotPatternRepository.findOverLappingPatterns(dayOfWeek, startTime, endTime);
+        int timeSlotCount = overlapping.size() + groupOverlapping.size();
+        if (timeSlotCount >= 4) {
+            throw new IllegalArgumentException("The number of pattern slots exceeds 4");
         }
+        List<Teacher> teachers = new ArrayList<>();
+        overlapping.stream().map(TimeSlotPattern::getTeacher).forEach(teachers::add);
+        groupOverlapping.stream().map(GroupTimeSlotPattern::getTeacher).forEach(teachers::add);
 
-        List<GroupTimeSlotPattern> groupOverlapping = groupTimeSlotPatternRepository
-                .findOverLappingPatterns(teacher, dayOfWeek, startTime, endTime);
-        if (!groupOverlapping.isEmpty()) {
-            throw new IllegalArgumentException("Overlapping patterns found");
+        for (Teacher teach : teachers) {
+            UUID teacherId = teach.getId();
+            if (teacherId.equals(teacher.getId())) {
+                throw new IllegalArgumentException("At this time, the teacher is already working: " + teacher.getName());
+            }
         }
     }
 
