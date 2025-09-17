@@ -1,0 +1,5 @@
+ALTER TABLE timeslots
+ADD COLUMN created_type VARCHAR(8) NOT NULL DEFAULT 'MANUAL';
+
+ALTER TABLE group_timeslots
+ADD COLUMN created_type VARCHAR(8) NOT NULL DEFAULT 'MANUAL';

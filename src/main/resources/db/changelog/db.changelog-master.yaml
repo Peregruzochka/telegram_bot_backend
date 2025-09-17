@@ -39,3 +39,5 @@ databaseChangeLog:
       file: db/changelog/changeset/v019_timeslot_pattern_init.sql
   - include:
       file: db/changelog/changeset/v020_teacher_telegram_id.sql
+  - include:
+      file: db/changelog/changeset/v021_timeslots_create_status.sql
