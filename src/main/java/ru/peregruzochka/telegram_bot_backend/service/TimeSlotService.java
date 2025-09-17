@@ -23,6 +23,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import static ru.peregruzochka.telegram_bot_backend.model.TimeslotCreatedType.AUTO;
+import static ru.peregruzochka.telegram_bot_backend.model.TimeslotCreatedType.MANUAL;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -104,6 +107,7 @@ public class TimeSlotService {
                 .startTime(startTime)
                 .endTime(endTime)
                 .isAvailable(true)
+                .createdType(MANUAL)
                 .build();
 
         TimeSlot savedTimeSlot = timeSlotRepository.save(timeSlot);
@@ -137,37 +141,87 @@ public class TimeSlotService {
     }
 
     @Transactional
-    public void clear(LocalDate from, LocalDate to) {
-        LocalDateTime fromTime = from.atStartOfDay();
-        LocalDateTime toTime = to.plusDays(1).atStartOfDay();
-        deleteIndividualSlots(fromTime, toTime);
-        deleteGroupSlots(fromTime, toTime);
+    public void fillByTeacherPatterns(UUID teacherId, LocalDate from, LocalDate to) {
+        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found")
+        );
+        LocalDate day = from;
+        while (day.isBefore(to.plusDays(1))) {
+            fillTeacherIndividualSlots(day, teacher);
+            fillTeacherGroupSlots(day, teacher);
+            day = day.plusDays(1);
+        }
     }
 
-    private void deleteIndividualSlots(LocalDateTime fromTime, LocalDateTime toTime) {
-        List<TimeSlot> slots = timeSlotRepository.findTimeSlotsByStartTimeBetween(fromTime, toTime);
+    @Transactional
+    public void clearAutoCreatedSlots(LocalDate from, LocalDate to) {
+        LocalDateTime fromTime = from.atStartOfDay();
+        LocalDateTime toTime = to.plusDays(1).atStartOfDay();
+        deleteAutoCreatedInd(fromTime, toTime);
+        deleteAutoCreatedGroup(fromTime, toTime);
+    }
+
+    @Transactional
+    public void clearTeacherAutoCreatedSlots(UUID teacherId, LocalDate from, LocalDate to) {
+        Teacher teacher = teacherRepository.findById(teacherId).orElseThrow(
+                () -> new IllegalArgumentException("Teacher not found")
+        );
+        LocalDateTime fromTime = from.atStartOfDay();
+        LocalDateTime toTime = to.plusDays(1).atStartOfDay();
+        deleteTeacherAutoCreatedInd(teacher, fromTime, toTime);
+        deleteTeacherAutoCreatedGroup(teacher, fromTime, toTime);
+    }
+
+    private void deleteAutoCreatedInd(LocalDateTime fromTime, LocalDateTime toTime) {
+        List<TimeSlot> slots = timeSlotRepository.findByStartTimeBetween(fromTime, toTime);
         int count = 0;
         for (TimeSlot slot : slots) {
-            if (!slot.getIsAvailable()) {
+            if (slot.getCreatedType().equals(MANUAL) || !slot.getIsAvailable()) {
                 continue;
             }
             timeSlotRepository.delete(slot);
             count++;
         }
-        log.info("Deleted time slot {}", count);
+        log.info("Deleted AUTO time slot {}", count);
     }
 
-    private void deleteGroupSlots(LocalDateTime fromTime, LocalDateTime toTime) {
-        List<GroupTimeSlot> slots = groupTimeSlotRepository.findTimeSlotsByStartTimeBetween(fromTime, toTime);
+    private void deleteTeacherAutoCreatedInd(Teacher teacher, LocalDateTime fromTime, LocalDateTime toTime) {
+        List<TimeSlot> slots = timeSlotRepository.findByTeacherAndStartTimeBetween(teacher, fromTime, toTime);
+        int count = 0;
+        for (TimeSlot slot : slots) {
+            if (slot.getCreatedType().equals(MANUAL) || !slot.getIsAvailable()) {
+                continue;
+            }
+            timeSlotRepository.delete(slot);
+            count++;
+        }
+        log.info("Deleted teacher ({}) AUTO time slot {}", teacher.getName(), count);
+    }
+
+    private void deleteAutoCreatedGroup(LocalDateTime fromTime, LocalDateTime toTime) {
+        List<GroupTimeSlot> slots = groupTimeSlotRepository.findByStartTimeBetween(fromTime, toTime);
         int count = 0;
         for (GroupTimeSlot slot : slots) {
-            if (!slot.getRegistrations().isEmpty()) {
+            if (slot.getCreatedType().equals(MANUAL) || !slot.getRegistrations().isEmpty()) {
                 continue;
             }
             groupTimeSlotRepository.delete(slot);
             count++;
         }
-        log.info("Deleted group time slot {}", count);
+        log.info("Deleted AUTO group time slot {}", count);
+    }
+
+    private void deleteTeacherAutoCreatedGroup(Teacher teacher, LocalDateTime fromTime, LocalDateTime toTime) {
+        List<GroupTimeSlot> slots = groupTimeSlotRepository.findByTeacherAndStartTimeBetween(teacher, fromTime, toTime);
+        int count = 0;
+        for (GroupTimeSlot slot : slots) {
+            if (slot.getCreatedType().equals(MANUAL) || !slot.getRegistrations().isEmpty()) {
+                continue;
+            }
+            groupTimeSlotRepository.delete(slot);
+            count++;
+        }
+        log.info("Deleted teacher ({}) AUTO group time slot {}", teacher.getName(), count);
     }
 
     private void fillGroupSlots(LocalDate day) {
@@ -187,12 +241,38 @@ public class TimeSlotService {
                     .startTime(slotStartTime)
                     .endTime(slotEndTime)
                     .groupLesson(lesson)
+                    .createdType(AUTO)
                     .build();
 
             groupTimeSlotRepository.save(slot);
             count++;
         }
-        log.info("Fill group slots by day:{} -> {}", day, count);
+        log.info("Fill AUTO group slots by day:{} -> {}", day, count);
+    }
+
+    private void fillTeacherGroupSlots(LocalDate day, Teacher teacher) {
+        DayOfWeek dayOfWeek = day.getDayOfWeek();
+        List<GroupTimeSlotPattern> groupPatternsByDay = groupTimeSlotPatternRepository.findByTeacherAndDayOfWeek(teacher, dayOfWeek);
+        int count = 0;
+        for (GroupTimeSlotPattern pattern : groupPatternsByDay) {
+            LocalDateTime slotStartTime = LocalDateTime.of(day, pattern.getStartTime());
+            LocalDateTime slotEndTime = LocalDateTime.of(day, pattern.getEndTime());
+            if (countOverlapping(teacher, slotStartTime, slotEndTime) > 0) {
+                continue;
+            }
+            GroupLesson lesson = pattern.getGroupLesson();
+            GroupTimeSlot slot = GroupTimeSlot.builder()
+                    .teacher(teacher)
+                    .startTime(slotStartTime)
+                    .endTime(slotEndTime)
+                    .groupLesson(lesson)
+                    .createdType(AUTO)
+                    .build();
+
+            groupTimeSlotRepository.save(slot);
+            count++;
+        }
+        log.info("Fill teacher ({}) AUTO group slots by day:{} -> {}", teacher.getName(), day, count);
     }
 
     private void fillIndividualSlots(LocalDate day) {
@@ -212,13 +292,41 @@ public class TimeSlotService {
                     .startTime(slotStartTime)
                     .endTime(slotEndTime)
                     .isAvailable(true)
+                    .createdType(AUTO)
                     .build();
 
             timeSlotRepository.save(slot);
             count++;
         }
-        log.info("Fill individual slots by day:{} -> {}", day, count);
+        log.info("Fill individual AUTO slots by day:{} -> {}", day, count);
     }
+
+    private void fillTeacherIndividualSlots(LocalDate day, Teacher teacher) {
+        DayOfWeek dayOfWeek = day.getDayOfWeek();
+        List<TimeSlotPattern> patternsByDay = timeSlotPatternRepository.findByTeacherAndDayOfWeek(teacher, dayOfWeek);
+        int count = 0;
+        for (TimeSlotPattern pattern : patternsByDay) {
+            LocalDateTime slotStartTime = LocalDateTime.of(day, pattern.getStartTime());
+            LocalDateTime slotEndTime = LocalDateTime.of(day, pattern.getEndTime());
+            if (countOverlapping(teacher, slotStartTime, slotEndTime) > 0) {
+                continue;
+            }
+
+            TimeSlot slot = TimeSlot.builder()
+                    .teacher(teacher)
+                    .startTime(slotStartTime)
+                    .endTime(slotEndTime)
+                    .isAvailable(true)
+                    .createdType(AUTO)
+                    .build();
+
+            timeSlotRepository.save(slot);
+            count++;
+        }
+        log.info("Fill teacher ({}) AUTO individual slots by day:{} -> {}", teacher.getName(), day, count);
+    }
+
+
 
     private int countOverlapping(Teacher teacher, LocalDateTime startTime, LocalDateTime endTime) {
         int slotCount = timeSlotRepository.findOverlappingTimeSlots(teacher, startTime, endTime).size();

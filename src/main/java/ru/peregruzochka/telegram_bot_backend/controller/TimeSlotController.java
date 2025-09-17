@@ -59,11 +59,27 @@ public class TimeSlotController {
         timeSlotService.fillByPatterns(from, to);
     }
 
-    @DeleteMapping("/clear")
+    @PostMapping("/fill-by-teacher")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void fillTimeSlotsByPatterns(@RequestParam("teacher-id") UUID teacherId,
+                                        @RequestParam("from") LocalDate from,
+                                        @RequestParam("to") LocalDate to) {
+        timeSlotService.fillByTeacherPatterns(teacherId, from, to);
+    }
+
+    @DeleteMapping("/clear-auto-created")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void clearTimeSlots(@RequestParam("from") LocalDate from,
                                @RequestParam("to") LocalDate to) {
-        timeSlotService.clear(from, to);
+        timeSlotService.clearAutoCreatedSlots(from, to);
+    }
+
+    @DeleteMapping("/clear-auto-created-by-teacher")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void clearTimeSlots(@RequestParam("teacher-id") UUID teacherId,
+                               @RequestParam("from") LocalDate from,
+                               @RequestParam("to") LocalDate to) {
+        timeSlotService.clearTeacherAutoCreatedSlots(teacherId, from, to);
     }
 
     @DeleteMapping("/{timeslot-id}")

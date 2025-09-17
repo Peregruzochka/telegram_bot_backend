@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.peregruzochka.telegram_bot_backend.model.GroupLesson;
 import ru.peregruzochka.telegram_bot_backend.model.GroupTimeSlot;
-import ru.peregruzochka.telegram_bot_backend.model.Lesson;
 import ru.peregruzochka.telegram_bot_backend.model.Teacher;
 import ru.peregruzochka.telegram_bot_backend.model.TimeSlot;
 import ru.peregruzochka.telegram_bot_backend.model.User;
@@ -21,6 +20,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+
+import static ru.peregruzochka.telegram_bot_backend.model.TimeslotCreatedType.MANUAL;
 
 @Slf4j
 @Service
@@ -48,6 +49,7 @@ public class GroupTimeSlotService {
                 .endTime(end)
                 .teacher(teacher)
                 .groupLesson(lesson)
+                .createdType(MANUAL)
                 .build();
 
         GroupTimeSlot savedGroupTimeSlot = groupTimeSlotRepository.save(groupTimeSlot);
