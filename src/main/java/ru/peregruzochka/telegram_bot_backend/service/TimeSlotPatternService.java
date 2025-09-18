@@ -14,7 +14,9 @@ import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotPatternRepositor
 import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Slf4j
@@ -50,19 +52,17 @@ public class TimeSlotPatternService {
         LocalTime endTime = startTime.plusMinutes(45);
         List<TimeSlotPattern> overlapping = timeSlotPatternRepository.findOverLappingPatterns(dayOfWeek, startTime, endTime);
         List<GroupTimeSlotPattern> groupOverlapping = groupTimeSlotPatternRepository.findOverLappingPatterns(dayOfWeek, startTime, endTime);
-        int timeSlotCount = overlapping.size() + groupOverlapping.size();
-        if (timeSlotCount >= 4) {
-            throw new IllegalArgumentException("The number of pattern slots exceeds 4");
-        }
-        List<Teacher> teachers = new ArrayList<>();
+
+        Set<Teacher> teachers = new HashSet<>();
         overlapping.stream().map(TimeSlotPattern::getTeacher).forEach(teachers::add);
         groupOverlapping.stream().map(GroupTimeSlotPattern::getTeacher).forEach(teachers::add);
 
-        for (Teacher teach : teachers) {
-            UUID teacherId = teach.getId();
-            if (teacherId.equals(teacher.getId())) {
+        if (teachers.size() >= 4) {
+            throw new IllegalArgumentException("The number of simultaneously working teachers exceeds 4");
+        }
+
+        if (teachers.contains(teacher)) {
                 throw new IllegalArgumentException("At this time, the teacher is already working: " + teacher.getName());
-            }
         }
     }
 
