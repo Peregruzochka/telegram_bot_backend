@@ -67,3 +67,17 @@ services:
     ports:
       - "8082:8082"
 
+  teacher:
+    build: C:\Users\Peregruzochka\Documents\GitHub\TeacherTelegramBot
+    pull_policy: build
+    container_name: tg-bot-teacher
+    restart: always
+    depends_on:
+      - backend
+    environment:
+      API_URL: http://192.168.31.103:8081
+      TOKEN: 8436678555:AAFTjYFN2gwFNqQ8rrFioY5zopkpd4X7Wi0
+      
+    ports:
+      - "8083:8083"
+
