@@ -13,7 +13,6 @@ import ru.peregruzochka.telegram_bot_backend.repository.TimeSlotPatternRepositor
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

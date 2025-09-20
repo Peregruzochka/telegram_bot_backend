@@ -72,7 +72,8 @@ public class RegistrationService {
     @Transactional
     public Registration addRegistration(Registration registration) {
         checkLesson(registration.getLesson());
-        checkTimeSlot(registration.getTimeslot());
+        TimeSlot dbTimeslot = checkTimeSlot(registration.getTimeslot());
+        registration.setTimeslot(dbTimeslot);
 
         UUID teacherId = registration.getTimeslot().getTeacher().getId();
         Teacher dbTeacher = teacherRepository.findById(teacherId).orElseThrow(
@@ -82,6 +83,7 @@ public class RegistrationService {
         registration.getTimeslot().setIsAvailable(false);
         registration.getTimeslot().setTeacher(dbTeacher);
         timeSlotRepository.save(registration.getTimeslot());
+        timeSlotRepository.flush();
 
         User user = registration.getUser();
         User dbUser = computeUser(user);
@@ -94,6 +96,8 @@ public class RegistrationService {
         registration.setConfirmStatus(status);
         registration.setCreatedAt(LocalDateTime.now());
         Registration newRegistration = registrationRepository.save(registration);
+        registrationRepository.flush();
+
         newRegistrationEventPublisher.publish(newRegistration);
         log.info("New registration: {}", newRegistration);
         return newRegistration;
@@ -395,13 +399,14 @@ public class RegistrationService {
         );
     }
 
-    private void checkTimeSlot(TimeSlot timeSlot) {
+    private TimeSlot checkTimeSlot(TimeSlot timeSlot) {
         TimeSlot dbTimeSlot = timeSlotRepository.findById(timeSlot.getId()).orElseThrow(
                 () -> new IllegalArgumentException("TimeSlot not found: " + timeSlot.getId())
         );
         if (!dbTimeSlot.getIsAvailable()) {
             throw new IllegalArgumentException("TimeSlot is not available");
         }
+        return dbTimeSlot;
     }
 
 
